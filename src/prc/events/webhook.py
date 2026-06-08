@@ -1,0 +1,2 @@
+class EventWebhook:
+    pass
