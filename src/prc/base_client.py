@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Self, cast
 import httpx
 
 from .v2.models import Endpoint
@@ -25,9 +25,9 @@ class _AsyncContext:
     server_key: str
     connection: HTTPXClient | None
 
-    async def __aenter__(self) -> httpx.AsyncClient:
+    async def __aenter__(self) -> Self:
         self.connection = create_async_client(self.server_key)
-        return self.connection
+        return self
     
     async def __aexit__(self, exc_type, exc, tb):
         if self.connection and not self.connection.is_closed:
@@ -40,9 +40,9 @@ class _SyncContext:
     server_key: str
     connection: HTTPXClient | None
 
-    def __enter__(self) -> httpx.Client:
+    def __enter__(self) -> Self:
         self.connection = create_sync_client(self.server_key)
-        return self.connection
+        return self
     
     def __exit__(self, exc_type, exc, tb):
         if self.connection and not self.connection.is_closed:
