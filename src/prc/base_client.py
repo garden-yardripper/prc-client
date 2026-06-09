@@ -1,9 +1,9 @@
 from typing import cast
 import httpx
 
-from prc.v2.models import Endpoint
-from prc.exceptions import ApiError, RateLimited, DeserializationError
-from prc import utils
+from .v2.models import Endpoint
+from .exceptions import ApiError, RateLimited, DeserializationError
+from . import utils
 
 type HTTPXClient = httpx.Client | httpx.AsyncClient
 
