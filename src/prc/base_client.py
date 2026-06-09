@@ -7,15 +7,26 @@ from . import utils
 
 type HTTPXClient = httpx.Client | httpx.AsyncClient
 
+def create_async_client(server_key: str, **kwargs) -> httpx.AsyncClient:
+    return httpx.AsyncClient(
+        base_url="https://api.erlc.gg/",
+        headers={"server-key": server_key},
+        **kwargs
+    )
+    
+def create_sync_client(server_key: str, **kwargs) -> httpx.Client:
+    return httpx.Client(
+        base_url="https://api.erlc.gg/",
+        headers={"server-key": server_key},
+        **kwargs
+    )
+
 class _AsyncContext:
     server_key: str
     connection: HTTPXClient | None
 
     async def __aenter__(self) -> httpx.AsyncClient:
-        self.connection = httpx.AsyncClient(
-            base_url="https://api.erlc.gg/",
-            headers={"server-key": self.server_key}
-        )
+        self.connection = create_async_client(self.server_key)
         return self.connection
     
     async def __aexit__(self, exc_type, exc, tb):
@@ -30,10 +41,7 @@ class _SyncContext:
     connection: HTTPXClient | None
 
     def __enter__(self) -> httpx.Client:
-        self.connection = httpx.Client(
-            base_url="https://api.erlc.gg/",
-            headers={"server-key": self.server_key}
-        )
+        self.connection = create_sync_client(self.server_key)
         return self.connection
     
     def __exit__(self, exc_type, exc, tb):
@@ -45,18 +53,21 @@ class _SyncContext:
 
 class _BaseApiClient(_SyncContext, _AsyncContext):
     def __init__(self, server_key: str, *, connection: HTTPXClient | None = None) -> None:
+        from .v2.client import AsyncClient # prevent circular import
         self.server_key = server_key
         self.connection: HTTPXClient | None = connection
         self.closed = False
+        self.is_async = issubclass(type(self), AsyncClient)
         
     async def send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
-            self.connection = httpx.AsyncClient(
-                base_url="https://api.erlc.gg/",
-                headers={"server-key": self.server_key}
-            )
+            # create the appropriate client based on the subclass type (async/sync)
+            if self.is_async:
+                self.connection = create_async_client(self.server_key)
+            else:
+                self.connection = create_sync_client(self.server_key)
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
         
