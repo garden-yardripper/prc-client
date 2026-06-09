@@ -47,14 +47,14 @@ class FullUser(BaseModel):
 
 class MinimalLocation(BaseModel):
     x: Annotated[float, Field(alias="LocationX")]
-    y: Annotated[float, Field(alias="LocationY")]
+    z: Annotated[float, Field(alias="LocationZ")]
     
     model_config = ConfigDict(alias_generator=to_pascal, populate_by_name=True, frozen=True)
     
     @property
     def position(self) -> tuple[float, float]:
-        """Returns the (x, y) position as a tuple."""
-        return self.x, self.y
+        """Returns the (x, z) position as a tuple."""
+        return self.x, self.z
 
 class Location(MinimalLocation):
     postal_code: int
@@ -102,7 +102,7 @@ class EmergencyCall(BaseModel):
     @field_validator("position", mode="before")
     def position_to_minimal_location(cls, v):
         if isinstance(v, list) and len(v) == 2:
-            return MinimalLocation(x=v[0], y=v[1])
+            return MinimalLocation(x=v[0], z=v[1])
         return v
     
     @field_validator("started_at", mode="before")
@@ -118,7 +118,11 @@ class Log(BaseModel):
     def timestamp_to_datetime(cls, v):
         return _validate_datetime(v)
     
-    @field_validator("user", "killed", "killer", "caller", "moderator", mode="before")
+    @field_validator(
+        "user", "killed", "killer", "caller", "moderator",
+        check_fields=False,
+        mode="before"
+    )
     def user_to_full_user(cls, v):
         return FullUser.validate_full_user(v)
 
