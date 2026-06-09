@@ -6,7 +6,7 @@ def _format_bool_params(mapping: dict[str, bool]) -> dict[str, str]:
     return {k: "true" if v else "false" for k, v in mapping.items()}
 
 class _GetServer(_BaseApiClient):
-    async def get_server_async(
+    async def _get_server_async(
         self, *,
         players: bool = False,
         staff: bool = False,
@@ -30,14 +30,14 @@ class _GetServer(_BaseApiClient):
             "Vehicles": vehicles
         })
         
-        response = await self.send_async_request(
+        response = await self._send_async_request(
             endpoint=Endpoint.v2_server,
             params=params
         )
         
         return Server.model_validate(response.json())
     
-    async def get_bundled_server_async(self) -> BundledServer:
+    async def _get_bundled_server_async(self) -> BundledServer:
         params = _format_bool_params({
             "Players": True,
             "Staff": True,
@@ -50,15 +50,15 @@ class _GetServer(_BaseApiClient):
             "Vehicles": True,
         })
         
-        response = await self.send_async_request(
+        response = await self._send_async_request(
             endpoint=Endpoint.v2_server,
             params=params
         )
         
         return BundledServer.model_validate(response.json())
     
-    def get_server_sync(self, **kwargs) -> Server:
-        return utils.execute_async(self.get_server_async(**kwargs))
+    def _get_server_sync(self, **kwargs) -> Server:
+        return utils.execute_async(self._get_server_async(**kwargs))
         
-    def get_bundled_server_sync(self) -> BundledServer:
-        return utils.execute_async(self.get_bundled_server_async())
+    def _get_bundled_server_sync(self) -> BundledServer:
+        return utils.execute_async(self._get_bundled_server_async())

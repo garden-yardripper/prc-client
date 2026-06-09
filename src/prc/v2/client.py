@@ -14,7 +14,7 @@ class AsyncClient(_GetServer):
         emergency_calls: bool = False,
         vehicles: bool = False
     ) -> Server:
-        return await self.get_server_async(
+        return await self._get_server_async(
             players=players,
             staff=staff,
             join_logs=join_logs,
@@ -27,7 +27,7 @@ class AsyncClient(_GetServer):
         )
     
     async def get_bundled_server(self) -> BundledServer:
-        return await self.get_bundled_server_async()
+        return await self._get_bundled_server_async()
 
 class Client(_GetServer):
     def get_server(
@@ -42,7 +42,7 @@ class Client(_GetServer):
         emergency_calls: bool = False,
         vehicles: bool = False
     ) -> Server:
-        return self.get_server_sync(
+        return self._get_server_sync(
             players=players,
             staff=staff,
             join_logs=join_logs,
@@ -55,4 +55,4 @@ class Client(_GetServer):
         )
     
     def get_bundled_server(self) -> BundledServer:
-        return self.get_bundled_server_sync()
+        return self._get_bundled_server_sync()

@@ -59,7 +59,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.closed = False
         self.is_async = issubclass(type(self), AsyncClient)
         
-    async def send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
+    async def _send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
@@ -96,8 +96,8 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             
         return resp
     
-    def send_sync_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
-        return utils.execute_async(self.send_async_request(endpoint, **kwargs))
+    def _send_sync_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
+        return utils.execute_async(self._send_async_request(endpoint, **kwargs))
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
