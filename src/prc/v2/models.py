@@ -173,7 +173,7 @@ class Staff(BaseModel):
 class Player(BaseModel):
     team: str
     user: Annotated[FullUser, Field(alias="Player")]
-    callsign: str
+    callsign: Annotated[str | None, Field(default=None)]
     location: Location
     permission: Literal["Normal", "Server Administrator", "Server Owner", "Server Moderator"]
     wanted_stars: int
@@ -214,7 +214,7 @@ class Server(_ServerBase):
     zzz_players: Annotated[list[dict] | None, Field(alias="Players")]
     zzz_staff: Annotated[dict | None, Field(alias="Staff")]
     zzz_join_logs: Annotated[list[dict] | None, Field(alias="JoinLogs")]
-    zzz_queue: Annotated[dict | None, Field(alias="Queue")]
+    zzz_queue: Annotated[list[int] | None, Field(alias="Queue")]
     zzz_kill_logs: Annotated[list[dict] | None, Field(alias="KillLogs")]
     zzz_command_logs: Annotated[list[dict] | None, Field(alias="CommandLogs")]
     zzz_mod_calls: Annotated[list[dict] | None, Field(alias="ModCalls")]
@@ -285,3 +285,9 @@ class BundledServer(_ServerBase):
     mod_calls: list[ModCall]
     emergency_calls: list[EmergencyCall]
     vehicles: list[Vehicle]
+    
+    @field_validator("queue", mode="before")
+    def queue_list_to_queue(cls, v):
+        if isinstance(v, list):
+            return Queue(players=v)
+        return v
