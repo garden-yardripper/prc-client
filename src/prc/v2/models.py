@@ -211,15 +211,15 @@ class _ServerBase(BaseModel):
         return v
 
 class Server(_ServerBase):
-    zzz_players: Annotated[list[dict] | None, Field(alias="Players")]
-    zzz_staff: Annotated[dict | None, Field(alias="Staff")]
-    zzz_join_logs: Annotated[list[dict] | None, Field(alias="JoinLogs")]
-    zzz_queue: Annotated[list[int] | None, Field(alias="Queue")]
-    zzz_kill_logs: Annotated[list[dict] | None, Field(alias="KillLogs")]
-    zzz_command_logs: Annotated[list[dict] | None, Field(alias="CommandLogs")]
-    zzz_mod_calls: Annotated[list[dict] | None, Field(alias="ModCalls")]
-    zzz_emergency_calls: Annotated[list[dict] | None, Field(alias="EmergencyCalls")]
-    zzz_vehicles: Annotated[list[dict] | None, Field(alias="Vehicles")]
+    zzz_players: Annotated[list[dict] | None, Field(default=None, alias="Players")]
+    zzz_staff: Annotated[dict | None, Field(default=None, alias="Staff")]
+    zzz_join_logs: Annotated[list[dict] | None, Field(default=None, alias="JoinLogs")]
+    zzz_queue: Annotated[list[int] | None, Field(default=None, alias="Queue")]
+    zzz_kill_logs: Annotated[list[dict] | None, Field(default=None, alias="KillLogs")]
+    zzz_command_logs: Annotated[list[dict] | None, Field(default=None, alias="CommandLogs")]
+    zzz_mod_calls: Annotated[list[dict] | None, Field(default=None, alias="ModCalls")]
+    zzz_emergency_calls: Annotated[list[dict] | None, Field(default=None, alias="EmergencyCalls")]
+    zzz_vehicles: Annotated[list[dict] | None, Field(default=None, alias="Vehicles")]
     
     @property
     def players(self) -> list[Player]:
