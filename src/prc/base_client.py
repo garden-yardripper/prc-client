@@ -87,3 +87,21 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     
     def send_sync_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
         return utils.execute_async(self.send_async_request(endpoint, **kwargs))
+    
+    async def aclose(self):
+        if not isinstance(self.connection, httpx.AsyncClient):
+            raise RuntimeError("Connection is not an async client; close with .close().")
+        if self.connection and not self.connection.is_closed:
+            await self.connection.aclose()
+        
+        self.connection = None
+        self.closed = True
+        
+    def close(self):
+        if not isinstance(self.connection, httpx.Client):
+            raise RuntimeError("Connection is not an async client; close with .aclose().")
+        if self.connection and not self.connection.is_closed:
+            self.connection.close()
+        
+        self.connection = None
+        self.closed = True
