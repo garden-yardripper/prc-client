@@ -19,7 +19,7 @@ def _validate_datetime(v):
     return v
 
 class UsernameUser(BaseModel):
-    username: str
+    name: str
     
     model_config = ConfigDict(frozen=True)
     
@@ -29,15 +29,15 @@ class IdUser(BaseModel):
     model_config = ConfigDict(frozen=True)
     
 class FullUser(BaseModel):
-    username: str
+    name: str
     id: int
     
     model_config = ConfigDict(frozen=True)
     
     @classmethod
     def from_delimited(cls, delimited: str):
-        username, id = delimited.split(":", maxsplit=1)
-        return cls(username=username, id=int(id))
+        name, id = delimited.split(":", maxsplit=1)
+        return cls(name=name, id=int(id))
     
     @classmethod
     def validate_full_user(cls, v):
@@ -76,7 +76,7 @@ class Vehicle(BaseModel):
     @field_validator("owner", mode="before")
     def owner_to_username_user(cls, v):
         if isinstance(v, str):
-            return UsernameUser(username=v)
+            return UsernameUser(name=v)
         return v
     
 class EmergencyCall(BaseModel):
@@ -167,7 +167,7 @@ class Staff(BaseModel):
     @field_validator("admins", "mods", "helpers", mode="before")
     def validate_full_user(cls, v):
         if isinstance(v, dict):
-            return [FullUser(username=username, id=int(id)) for id, username in v.items()]
+            return [FullUser(name=name, id=int(id)) for id, name in v.items()]
         return v
     
 class Player(BaseModel):
