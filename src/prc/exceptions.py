@@ -2,10 +2,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class DeserializationError(Exception):
+class PRCError(Exception):
+    """Base class for all PRC API errors."""
+
+class DeserializationError(PRCError):
     """Raised when PRC API JSON data was unable to be deserialized into a Python object."""
 
-class ApiError(Exception):
+class DataNotRequestedError(PRCError):
+    """Raised when attempting to access data that was not requested from the API."""
+
+class ApiError(PRCError):
     """Raised when the PRC API returned an error."""
     def __init__(self, code: int, message: str):
         self.code = code
