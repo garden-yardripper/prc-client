@@ -1,7 +1,7 @@
 from httpx import Response
 from .models import Server, BundledServer
 from .server import _GetServer
-from .command import _SendCommand, Command
+from .command import _SendCommand, CommandLike
 
 class AsyncClient(_GetServer, _SendCommand):
     async def get_server(
@@ -31,7 +31,7 @@ class AsyncClient(_GetServer, _SendCommand):
     async def get_bundled_server(self) -> BundledServer:
         return await self._get_bundled_server_async()
     
-    async def send_command(self, command: str | Command) -> Response:
+    async def send_command(self, command: CommandLike) -> Response:
         cmd = command if isinstance(command, str) else command.text
         return await self._send_command_async(cmd)
 
@@ -63,6 +63,6 @@ class Client(_GetServer, _SendCommand):
     def get_bundled_server(self) -> BundledServer:
         return self._get_bundled_server_sync()
     
-    def send_command(self, command: str | Command) -> Response:
+    def send_command(self, command: CommandLike) -> Response:
         cmd = command if isinstance(command, str) else command.text
         return self._send_command_sync(cmd)

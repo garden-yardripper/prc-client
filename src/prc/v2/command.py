@@ -21,6 +21,8 @@ type AnyUserType = Player | FullUser | UsernameUser | IdUser | str | int
 type UsernameUserType = Player | FullUser | UsernameUser | str
 type IdUserType = Player | FullUser | IdUser | int
 
+type CommandLike = Command | str
+
 class _CmdFactory:
     if TYPE_CHECKING:
         # define in-game command methods 
