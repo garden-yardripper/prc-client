@@ -9,12 +9,12 @@ def normalize_command(command: str) -> str:
     return command if command.startswith(":") else f":{command}"
 
 class Command(BaseModel):
-    command: str
+    text: str
     
     @property
     def payload(self) -> dict[str, str]:
         """Returns the payload to send this command to the API."""
-        return {"command": self.command}
+        return {"command": self.text}
 
 # define user types
 type AnyUserType = Player | FullUser | UsernameUser | IdUser | str | int
@@ -73,7 +73,7 @@ class _CmdFactory:
             # join the parsed arguments
             joined_args = ' '.join(parsed)
             full = f"{name} {joined_args}".strip()
-            return Command(command=normalize_command(full))
+            return Command(text=normalize_command(full))
         return call
 
 cmd: _CmdFactory = _CmdFactory()
