@@ -83,7 +83,7 @@ cmd: _CmdFactory = _CmdFactory()
 
 Used to build commands, such as `cmd.hint("Hello, World!")` or `cmd.kick(["player1", "player2"], "reason")`.
 
-In-game commands have type hints/method stubs, but custom commands can be created the same way
+In-game commands have type hints/method stubs, but any command can be created the same way
 and user arguments will be parsed automatically."""
 
 class _SendCommand(_BaseApiClient):
