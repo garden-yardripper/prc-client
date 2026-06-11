@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from pydantic.alias_generators import to_pascal
+from ..exceptions import DataNotRequestedError
 
 class Endpoint(Enum):
     v2_server = "/v2/server"
@@ -242,55 +243,55 @@ class Server(_ServerBase):
     @property
     def players(self) -> list[Player]:
         if not self.zzz_players:
-            raise ValueError("Player data not requested.")
+            raise DataNotRequestedError("Player data not requested.")
         return [Player.model_validate(player_dict) for player_dict in self.zzz_players]
     
     @property
     def staff(self) -> Staff:
         if not self.zzz_staff:
-            raise ValueError("Staff data not requested.")
+            raise DataNotRequestedError("Staff data not requested.")
         return Staff.model_validate(self.zzz_staff)
     
     @property
     def join_logs(self) -> list[JoinLog]:
         if not self.zzz_join_logs:
-            raise ValueError("Join log data not requested.")
+            raise DataNotRequestedError("Join log data not requested.")
         return [JoinLog.model_validate(log_dict) for log_dict in self.zzz_join_logs]
     
     @property
     def queue(self) -> Queue:
         if not self.zzz_queue:
-            raise ValueError("Queue data not requested.")
+            raise DataNotRequestedError("Queue data not requested.")
         return Queue.model_validate(self.zzz_queue)
     
     @property
     def kill_logs(self) -> list[KillLog]:
         if not self.zzz_kill_logs:
-            raise ValueError("Kill log data not requested.")
+            raise DataNotRequestedError("Kill log data not requested.")
         return [KillLog.model_validate(log_dict) for log_dict in self.zzz_kill_logs]
     
     @property
     def command_logs(self) -> list[CommandLog]:
         if not self.zzz_command_logs:
-            raise ValueError("Command log data not requested.")
+            raise DataNotRequestedError("Command log data not requested.")
         return [CommandLog.model_validate(log_dict) for log_dict in self.zzz_command_logs]
     
     @property
     def mod_calls(self) -> list[ModCall]:
         if not self.zzz_mod_calls:
-            raise ValueError("Mod call data not requested.")
+            raise DataNotRequestedError("Mod call data not requested.")
         return [ModCall.model_validate(mod_call_dict) for mod_call_dict in self.zzz_mod_calls]
     
     @property
     def emergency_calls(self) -> list[EmergencyCall]:
         if not self.zzz_emergency_calls:
-            raise ValueError("Emergency call data not requested.")
+            raise DataNotRequestedError("Emergency call data not requested.")
         return [EmergencyCall.model_validate(emergency_call_dict) for emergency_call_dict in self.zzz_emergency_calls]
     
     @property
     def vehicles(self) -> list[Vehicle]:
         if not self.zzz_vehicles:
-            raise ValueError("Vehicle data not requested.")
+            raise DataNotRequestedError("Vehicle data not requested.")
         return [Vehicle.model_validate(vehicle_dict) for vehicle_dict in self.zzz_vehicles]
 
 class BundledServer(_ServerBase):
