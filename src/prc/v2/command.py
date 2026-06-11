@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 from httpx import Response
 from pydantic import BaseModel
@@ -59,7 +60,7 @@ class _CmdFactory:
             # parse player/user objects into username/ID representations
             parsed: list[str] = []
             for arg in args:
-                for item in arg if isinstance(arg, list) else [arg]:
+                for item in arg if isinstance(arg, Iterable) else [arg]:
                     if isinstance(item, Player):
                         parsed.append(item.user.name)
                     elif isinstance(item, (UsernameUser, FullUser)):
@@ -75,7 +76,13 @@ class _CmdFactory:
             return Command(command=normalize_command(full))
         return call
 
-cmd = _CmdFactory()
+cmd: _CmdFactory = _CmdFactory()
+"""Factory for creating in-game commands.
+
+Used to build commands, such as `cmd.hint("Hello, World!")` or `cmd.kick(["player1", "player2"], "reason")`.
+
+In-game commands have type hints/method stubs, but custom commands can be created the same way
+and user arguments will be parsed automatically."""
 
 class _SendCommand(_BaseApiClient):
     async def _send_command_async(self, command: str) -> Response:
@@ -89,3 +96,5 @@ class _SendCommand(_BaseApiClient):
             endpoint=Endpoint.v2_command,
             json={"command": normalize_command(command)}
         )
+        
+__all__ = ["cmd"]
