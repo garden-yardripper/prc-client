@@ -23,11 +23,20 @@ class UsernameUser(BaseModel):
     
     model_config = ConfigDict(frozen=True)
     
+    def __str__(self):
+        return self.name
+
 class IdUser(BaseModel):
     id: int
     
     model_config = ConfigDict(frozen=True)
     
+    def __int__(self):
+        return self.id
+    
+    def __str__(self):
+        return str(self.id)
+
 class FullUser(BaseModel):
     name: str
     id: int
@@ -44,6 +53,12 @@ class FullUser(BaseModel):
         if isinstance(v, str):
             return cls.from_delimited(v)
         return v
+    
+    def __str__(self):
+        return f"{self.name}:{self.id}"
+    
+    def __int__(self):
+        return int(self.id)
 
 class MinimalLocation(BaseModel):
     x: Annotated[float, Field(alias="LocationX")]
@@ -189,6 +204,9 @@ class Player(BaseModel):
         if isinstance(v, dict):
             return Location.model_validate(v)
         return v
+    
+    def __str__(self):
+        return str(self.user)
 
 class _ServerBase(BaseModel):
     name: str
