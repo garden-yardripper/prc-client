@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 from httpx import Response
 from pydantic import BaseModel, field_validator
 from ..v2.models import (
@@ -37,6 +37,12 @@ class Command(BaseModel):
     """
     text: str
     
+    dangerous_cmds: ClassVar[set[str]] = {
+        ":kick", ":ban", ":wanted", ":unwanted",
+        ":jail", ":unjail", ":kill", ":heal",
+        ":refresh", ":respawn"
+    }
+    
     @field_validator("text", mode="after")
     def normalize_text(cls, v):
         return normalize_command(v)
@@ -62,16 +68,9 @@ class Command(BaseModel):
     @property
     def dangerous(self) -> bool:
         """Returns True if the command is dangerous (e.g. `:kick all`, `:ban all`), else False."""
-        
-        DANGEROUS_CMDS = {
-            ":kick", ":ban", ":wanted", ":unwanted",
-            ":jail", ":unjail", ":kill", ":heal",
-            ":refresh", ":respawn"
-        }
-        
         return any(
             self.text.startswith((f"{cmd} all", f"{cmd} others"))
-            for cmd in DANGEROUS_CMDS
+            for cmd in type(self).dangerous_cmds
         )
 
 # define user types
