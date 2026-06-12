@@ -95,7 +95,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         else:
             self.post_expiration = int(limit_expiration) or self.post_expiration
         
-    async def _send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
+    async def _send_async_request(self, endpoint: Endpoint, immediate: bool = False, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
@@ -104,13 +104,21 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send async request; connection is not an async client.")
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
+        if not immediate:
+            if method == "GET":
+                if self.get_on_cooldown:
+                    await self.await_for_get_cooldown()
+            else:
+                if self.post_on_cooldown:
+                    await self.await_for_post_cooldown()
+        
         resp = await self.connection.request(method, endpoint.value, **kwargs)
         self._raise_for_status(resp)
         self._update_ratelimit(resp)
             
         return resp
     
-    def _send_sync_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
+    def _send_sync_request(self, endpoint: Endpoint, immediate: bool = False, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
@@ -119,6 +127,14 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send sync request; connection is not a sync client.")
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
+        if not immediate:
+            if method == "GET":
+                if self.get_on_cooldown:
+                    self.wait_for_get_cooldown()
+            else:
+                if self.post_on_cooldown:
+                    self.wait_for_post_cooldown()
+        
         resp = self.connection.request(method, endpoint.value, **kwargs)
         self._raise_for_status(resp)
         self._update_ratelimit(resp)
@@ -136,24 +152,25 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def wait_for_get_cooldown(self):
         if self.is_async:
             raise RuntimeError("Client is not synchronous - use 'await_for_get_cooldown' instead.")
-        if self.get_remaining > 0:
-            time.sleep(max(self.get_expiration - time.time(), 0))
+        if self.get_remaining <= 0:
+            # add 1 second for redundancy
+            time.sleep(max(self.get_expiration - time.time() + 1, 0))
         
     async def await_for_get_cooldown(self):
         if not self.is_async:
             raise RuntimeError("Client is not async - use 'wait_for_get_cooldown' instead.")
-        if self.get_remaining > 0:
-            await asyncio.sleep(max(self.get_expiration - time.time(), 0))
+        if self.get_remaining <= 0:
+            await asyncio.sleep(max(self.get_expiration - time.time() + 1, 0))
             
     def wait_for_post_cooldown(self):
         if self.is_async:
             raise RuntimeError("Client is not synchronous - use 'await_for_get_cooldown' instead.")
-        time.sleep(max(self.post_expiration - time.time(), 0))
+        time.sleep(max(self.post_expiration - time.time() + 1, 0))
         
     async def await_for_post_cooldown(self):
         if not self.is_async:
             raise RuntimeError("Client is not async - use 'wait_for_get_cooldown' instead.")
-        await asyncio.sleep(max(self.post_expiration - time.time(), 0))
+        await asyncio.sleep(max(self.post_expiration - time.time() + 1, 0))
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
