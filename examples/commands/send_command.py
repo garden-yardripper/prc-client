@@ -1,7 +1,7 @@
 import prc
 from prc.v2.command import cmd
 
-with prc.v2.Client("...", handle_rate_limit=True) as client:
+with prc.v2.Client(server_key="...") as client:
     server = client.get_server(players=True)
     
     # Get players whose names start with 'all' or 'others'
