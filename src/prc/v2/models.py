@@ -419,9 +419,7 @@ class Server(_ServerBase):
         The type of verification required to join the server.
     team_balance: `bool`
         Whether or not the server enforces team balance.
-
-    Properties
-    ----------
+    
     players: `list[Player]`
         The players currently on the server.
     staff: `Staff`
@@ -527,8 +525,6 @@ class BundledServer(_ServerBase):
     team_balance: `bool`
         Whether or not the server enforces team balance.
 
-    Properties
-    ----------
     players: `list[Player]`
         The players currently on the server.
     staff: `Staff`

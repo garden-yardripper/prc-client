@@ -1,7 +1,7 @@
 from httpx import Response
 from .models import Server, BundledServer
 from .server import _GetServer
-from .command import _SendCommand, CommandLike
+from ..command import _SendCommand, CommandLike
 
 type ClientType = AsyncClient | Client
 
