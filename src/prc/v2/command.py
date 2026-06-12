@@ -98,5 +98,3 @@ class _SendCommand(_BaseApiClient):
             endpoint=Endpoint.v2_command,
             json={"command": normalize_command(command)}
         )
-        
-__all__ = ["cmd"]
