@@ -24,6 +24,17 @@ class CommandPolicy:
         blacklist: set[str] | None = None,
         max_length: int = 120
     ) -> None:
+        """Initialize a new CommandPolicy.
+
+        Parameters
+        ----------
+        whitelist: `set[str]` | `None` (optional)
+            A set of allowed commands.
+        blacklist: `set[str]` | `None` (optional)
+            A set of forbidden commands. Takes priority over whitelist.
+        max_length: `int` (optional)
+            The maximum length of a command. Defaults to 120.
+        """
         whitelist = whitelist or set()
         blacklist = blacklist or set()
         self.whitelist = {normalize_command(cmd) for cmd in whitelist}
