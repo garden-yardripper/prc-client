@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from httpx import Response
 from pydantic import BaseModel
@@ -58,11 +58,13 @@ class _CmdFactory:
     
     # handle argument parsing and custom command creation
     def __getattr__(self, name: str):
-        def call(*args):
+        def call(*args, **kwargs) -> Command:
             # parse player/user objects into username/ID representations
             parsed: list[str] = []
-            for arg in args:
-                for item in arg if isinstance(arg, Iterable) else [arg]:
+            collected_args = list(args) + list(kwargs.values())
+            
+            for arg in collected_args:
+                for item in arg if isinstance(arg, (list, tuple, set)) else [arg]:
                     if isinstance(item, Player):
                         parsed.append(item.user.name)
                     elif isinstance(item, (UsernameUser, FullUser)):
