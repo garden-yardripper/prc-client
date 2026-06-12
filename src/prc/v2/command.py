@@ -9,9 +9,26 @@ if TYPE_CHECKING:
     from .client import AsyncClient, Client
 
 def normalize_command(command: str) -> str:
+    """Normalize a command by ensuring it starts with a colon."""
     return command if command.startswith(":") else f":{command}"
 
 class Command(BaseModel):
+    """Represents an in-game command.
+    
+    This model is not meant to be instantiated directly;
+    instead, import and use the `cmd` instance to dynamically create `Command` objects:
+    
+    ```python
+    from prc.v2 import cmd
+    
+    cmd.pm("Alice", "Hello World!") # Command(text=":pm Alice Hello World!")
+    ```
+    
+    Attributes
+    ----------
+    text: `str`
+        The command's text.
+    """
     text: str
     
     async def asend(self, client: "AsyncClient"):
