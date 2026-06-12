@@ -1,17 +1,19 @@
 from prc.v2.models import Location, MinimalLocation, Player, EmergencyCall
 import math
 
+type PositionLike = Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float]
+
 def get_distance_between_locations(
-    location1: Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float],
-    location2: Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float]
+    location1: PositionLike,
+    location2: PositionLike
 ) -> float:
     """Get the Euclidean distance between two locations as a float.
     
     Parameters
     ----------
-    location1: `Location` | `Player` | `EmergencyCall`
+    location1: `PositionLike`
         The first location.
-    location2: `Location` | `Player` | `EmergencyCall`
+    location2: `PositionLike`
         The second location.
     """
     if isinstance(location1, Player):
