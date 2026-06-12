@@ -20,6 +20,13 @@ def _validate_datetime(v):
     return v
 
 class UsernameUser(BaseModel):
+    """Represents a user returned by the API with only a username.
+    
+    Attributes
+    ----------
+    name: `str`
+        The user's username.
+    """
     name: str
     
     model_config = ConfigDict(frozen=True)
@@ -28,6 +35,13 @@ class UsernameUser(BaseModel):
         return self.name
 
 class IdUser(BaseModel):
+    """Represents a user returned by the API with only an ID.
+    
+    Attributes
+    ----------
+    id: `int`
+        The user's ID.
+    """
     id: int
     
     model_config = ConfigDict(frozen=True)
@@ -39,6 +53,15 @@ class IdUser(BaseModel):
         return str(self.id)
 
 class FullUser(BaseModel):
+    """Represents a user returned by the API with a username and ID.
+    
+    Attributes
+    ----------
+    name: `str`
+        The user's username.
+    id: `int`
+        The user's ID.
+    """
     name: str
     id: int
     
@@ -62,6 +85,7 @@ class FullUser(BaseModel):
         return int(self.id)
 
 class MinimalLocation(BaseModel):
+    """Represents a location with minimal information."""
     x: Annotated[float, Field(alias="LocationX")]
     z: Annotated[float, Field(alias="LocationZ")]
     
