@@ -3,7 +3,6 @@ import httpx
 
 from .v2.models import Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
-from . import utils
 
 type HTTPXClient = httpx.Client | httpx.AsyncClient
 
@@ -54,30 +53,13 @@ class _SyncContext:
 class _BaseApiClient(_SyncContext, _AsyncContext):
     def __init__(self, server_key: str, *, connection: HTTPXClient | None = None) -> None:
         from .v2.client import AsyncClient # prevent circular import
-        self.server_key = server_key
+        self.server_key: str = server_key
         self.connection: HTTPXClient | None = connection
-        self.closed = False
-        self.is_async = issubclass(type(self), AsyncClient)
+        self.closed: bool = False
+        self.is_async: bool = issubclass(type(self), AsyncClient)
         
-    async def _send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
-        if self.connection is None and self.closed:
-            raise RuntimeError("Unable to make request as this connection is closed.")
-        if self.connection is None:
-            # create the appropriate client based on the subclass type (async/sync)
-            if self.is_async:
-                self.connection = create_async_client(self.server_key)
-            else:
-                self.connection = create_sync_client(self.server_key)
-        
-        method = "GET" if endpoint == Endpoint.v2_server else "POST"
-        
-        if isinstance(self.connection, httpx.AsyncClient):
-            resp = await self.connection.request(method, endpoint.value, **kwargs)
-        else:
-            resp = self.connection.request(method, endpoint.value, **kwargs)
-        
+    def _raise_for_status(self, resp: httpx.Response):
         body = resp.json()
-        
         if resp.status_code == 429:
             try:
                 raise RateLimited.from_dict(body)
@@ -93,11 +75,34 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
                 raise ApiError.from_dict(body)
             except DeserializationError:
                 raise ApiError(code=resp.status_code, message="API call failed (status not 200).")
+        
+    async def _send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
+        if self.connection is None and self.closed:
+            raise RuntimeError("Unable to make request as this connection is closed.")
+        if self.connection is None:
+            self.connection = create_async_client(self.server_key)
+        if not isinstance(self.connection, httpx.AsyncClient):
+            raise RuntimeError("Cannot send async request; connection is not an async client.")
+        
+        method = "GET" if endpoint == Endpoint.v2_server else "POST"
+        resp = await self.connection.request(method, endpoint.value, **kwargs)
+        self._raise_for_status(resp)
             
         return resp
     
     def _send_sync_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
-        return utils.execute_async(self._send_async_request(endpoint, **kwargs))
+        if self.connection is None and self.closed:
+            raise RuntimeError("Unable to make request as this connection is closed.")
+        if self.connection is None:
+            self.connection = create_sync_client(self.server_key)
+        if not isinstance(self.connection, httpx.Client):
+            raise RuntimeError("Cannot send sync request; connection is not a sync client.")
+        
+        method = "GET" if endpoint == Endpoint.v2_server else "POST"
+        resp = self.connection.request(method, endpoint.value, **kwargs)
+        self._raise_for_status(resp)
+        
+        return resp
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
