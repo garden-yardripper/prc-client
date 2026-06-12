@@ -12,7 +12,7 @@ from .v2.models import (
 from .base_client import _BaseApiClient
 
 if TYPE_CHECKING:
-    from .v2.client import AsyncClient, Client
+    from .v2.client import AsyncClient as V2AsyncClient, Client as V2Client
 
 def normalize_command(command: str) -> str:
     """Normalize a command by ensuring it starts with a colon."""
@@ -47,11 +47,11 @@ class Command(BaseModel):
     def normalize_text(cls, v):
         return normalize_command(v)
     
-    async def asend(self, client: "AsyncClient"):
+    async def asend(self, client: "V2AsyncClient"):
         """Sends this command to the API using the provided asynchronous client."""
         return await client.send_command(self)
     
-    def send(self, client: "Client") -> Response:
+    def send(self, client: "V2Client") -> Response:
         """Sends this command to the API using the provided synchronous client."""
         return client.send_command(self)
     
