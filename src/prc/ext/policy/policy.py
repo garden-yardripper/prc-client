@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from ...v2.command import Command, CommandLike, normalize_command
+from ...command import Command, CommandLike, normalize_command
 from ...exceptions import CommandPolicyViolation
 
 class CommandPreview(BaseModel):

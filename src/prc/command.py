@@ -2,17 +2,17 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, ClassVar
 from httpx import Response
 from pydantic import BaseModel, field_validator
-from ..v2.models import (
+from .v2.models import (
     Endpoint as V2Endpoint,
     Player as V2Player,
     FullUser as V2FullUser,
     UsernameUser as V2UsernameUser,
     IdUser as V2IdUser
 )
-from ..base_client import _BaseApiClient
+from .base_client import _BaseApiClient
 
 if TYPE_CHECKING:
-    from .client import AsyncClient, Client
+    from .v2.client import AsyncClient, Client
 
 def normalize_command(command: str) -> str:
     """Normalize a command by ensuring it starts with a colon."""

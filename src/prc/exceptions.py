@@ -1,6 +1,6 @@
 import logging
 from prc.ext.policy.policy import CommandPreview
-from prc.v2.command import Command
+from prc.command import Command
 
 logger = logging.getLogger(__name__)
 
