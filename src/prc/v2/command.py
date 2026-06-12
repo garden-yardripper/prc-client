@@ -75,7 +75,21 @@ class _CmdFactory:
             collected_args = list(args) + list(kwargs.values())
             
             for arg in collected_args:
-                for item in arg if isinstance(arg, (list, tuple, set)) else [arg]:
+                # treat non-string sequences as a grouped player list
+                if isinstance(arg, Sequence) and not isinstance(arg, (str, bytes)):
+                    items: list[str] = []
+                    for item in arg:
+                        if isinstance(item, Player):
+                            items.append(item.user.name)
+                        elif isinstance(item, (UsernameUser, FullUser)):
+                            items.append(item.name)
+                        elif isinstance(item, IdUser):
+                            items.append(str(item.id))
+                        else:
+                            items.append(str(item))
+                    parsed.append(','.join(items))
+                else:
+                    item = arg
                     if isinstance(item, Player):
                         parsed.append(item.user.name)
                     elif isinstance(item, (UsernameUser, FullUser)):
