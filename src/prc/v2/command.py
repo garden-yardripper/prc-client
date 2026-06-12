@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from httpx import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from ..v2.models import Endpoint, Player, FullUser, UsernameUser, IdUser
 from ..base_client import _BaseApiClient
 
@@ -27,9 +27,13 @@ class Command(BaseModel):
     Attributes
     ----------
     text: `str`
-        The command's text.
+        The command's normalized text.
     """
     text: str
+    
+    @field_validator("text", mode="after")
+    def normalize_text(cls, v):
+        return normalize_command(v)
     
     async def asend(self, client: "AsyncClient"):
         """Sends this command to the API using the provided asynchronous client."""
@@ -119,7 +123,7 @@ class _CmdFactory:
             # join the parsed arguments
             joined_args = ' '.join(parsed)
             full = f"{name} {joined_args}".strip()
-            return Command(text=normalize_command(full))
+            return Command(text=full)
         return call
 
 cmd: _CmdFactory = _CmdFactory()
