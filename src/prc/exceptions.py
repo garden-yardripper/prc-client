@@ -1,4 +1,6 @@
 import logging
+from prc.ext.policy.policy import CommandPreview
+from prc.v2.command import Command
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +12,29 @@ class DeserializationError(PRCError):
 
 class DataNotRequestedError(PRCError):
     """Raised when attempting to access data that was not requested from the API."""
+
+class CommandPolicyViolation(PRCError):
+    """Represents a raised violation of the command policy.
+    
+    Attributes
+    ----------
+    command: `Command`
+        The preview's Command object.
+    allowed: `bool`
+        Whether the command violates the command policy.
+    reason: `str` | `None`
+        The reason the command is not allowed.
+    """
+    def __init__(self, command: Command, allowed: bool, reason: str | None = None) -> None:
+        self.command: Command = command
+        self.allowed: bool = allowed
+        self.reason: str | None = reason
+        super().__init__(f"{allowed=}: {self.reason}")
+        
+    @classmethod
+    def from_preview(cls, preview: CommandPreview):
+        return cls(preview.command, preview.allowed, preview.reason)
+        
 
 class ApiError(PRCError):
     """Raised when the PRC API returned an error."""
