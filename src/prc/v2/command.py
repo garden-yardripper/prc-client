@@ -4,8 +4,7 @@ from httpx import Response
 from pydantic import BaseModel
 from ..v2.models import Endpoint, Player, FullUser, UsernameUser, IdUser
 from ..base_client import _BaseApiClient
-from .client import AsyncClient, ClientType
-from ..utils import execute_async
+from .client import AsyncClient, Client
 
 def normalize_command(command: str) -> str:
     return command if command.startswith(":") else f":{command}"
@@ -13,19 +12,13 @@ def normalize_command(command: str) -> str:
 class Command(BaseModel):
     text: str
     
-    def send(self, client: ClientType) -> Response:
-        """Sends this command to the API using the provided client.
-        Raises `RuntimeError` if an async client is provided in a running event loop."""
-        if isinstance(client, AsyncClient):
-            try:
-                return execute_async(client.send_command(self))
-            except RuntimeError:
-                raise RuntimeError((
-                    "Unable to send command with an async client in a running event loop;"
-                    "use 'await client.send_command(...)' instead."
-                ))
-        else:
-            return client.send_command(self)
+    async def asend(self, client: AsyncClient):
+        """Sends this command to the API using the provided asynchronous client."""
+        return await client.send_command(self)
+    
+    def send(self, client: Client) -> Response:
+        """Sends this command to the API using the provided synchronous client."""
+        return client.send_command(self)
     
     @property
     def payload(self) -> dict[str, str]:
