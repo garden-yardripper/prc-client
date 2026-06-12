@@ -2,7 +2,13 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from httpx import Response
 from pydantic import BaseModel, field_validator
-from ..v2.models import Endpoint, Player, FullUser, UsernameUser, IdUser
+from ..v2.models import (
+    Endpoint as V2Endpoint,
+    Player as V2Player,
+    FullUser as V2FullUser,
+    UsernameUser as V2UsernameUser,
+    IdUser as V2IdUser
+)
 from ..base_client import _BaseApiClient
 
 if TYPE_CHECKING:
@@ -69,9 +75,9 @@ class Command(BaseModel):
         )
 
 # define user types
-type AnyUserType = Player | FullUser | UsernameUser | IdUser | str | int
-type UsernameUserType = Player | FullUser | UsernameUser | str
-type IdUserType = Player | FullUser | IdUser | int
+type AnyUserType = V2Player | V2FullUser | V2UsernameUser | V2IdUser | str | int
+type UsernameUserType = V2Player | V2FullUser | V2UsernameUser | str
+type IdUserType = V2Player | V2FullUser | V2IdUser | int
 
 type CommandLike = Command | str
 
@@ -120,22 +126,22 @@ class _CmdFactory:
                 if isinstance(arg, Sequence) and not isinstance(arg, (str, bytes)):
                     items: list[str] = []
                     for item in arg:
-                        if isinstance(item, Player):
+                        if isinstance(item, V2Player):
                             items.append(item.user.name)
-                        elif isinstance(item, (UsernameUser, FullUser)):
+                        elif isinstance(item, (V2UsernameUser, V2FullUser)):
                             items.append(item.name)
-                        elif isinstance(item, IdUser):
+                        elif isinstance(item, V2IdUser):
                             items.append(str(item.id))
                         else:
                             items.append(str(item))
                     parsed.append(','.join(items))
                 else:
                     item = arg
-                    if isinstance(item, Player):
+                    if isinstance(item, V2Player):
                         parsed.append(item.user.name)
-                    elif isinstance(item, (UsernameUser, FullUser)):
+                    elif isinstance(item, (V2UsernameUser, V2FullUser)):
                         parsed.append(item.name)
-                    elif isinstance(item, IdUser):
+                    elif isinstance(item, V2IdUser):
                         parsed.append(str(item.id))
                     else:
                         parsed.append(str(item))
@@ -157,12 +163,12 @@ and user arguments will be parsed automatically."""
 class _SendCommand(_BaseApiClient):
     async def _send_command_async(self, command: str) -> Response:
         return await self._send_async_request(
-            endpoint=Endpoint.v2_command,
+            endpoint=V2Endpoint.v2_command,
             json={"command": normalize_command(command)}
         )
         
     def _send_command_sync(self, command: str) -> Response:
         return self._send_sync_request(
-            endpoint=Endpoint.v2_command,
+            endpoint=V2Endpoint.v2_command,
             json={"command": normalize_command(command)}
         )
