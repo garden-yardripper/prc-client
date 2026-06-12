@@ -85,7 +85,15 @@ class FullUser(BaseModel):
         return int(self.id)
 
 class MinimalLocation(BaseModel):
-    """Represents a location with minimal information."""
+    """Represents a location with minimal information.
+    
+    Attributes
+    ----------
+    x: `float`
+        The location's X coordinate.
+    z: `float`
+        The location's Z coordinate.
+    """
     x: Annotated[float, Field(alias="LocationX")]
     z: Annotated[float, Field(alias="LocationZ")]
     
@@ -97,6 +105,21 @@ class MinimalLocation(BaseModel):
         return self.x, self.z
 
 class Location(MinimalLocation):
+    """Represents a location with full information.
+    
+    Attributes
+    ----------
+    x: `float`
+        The location's X coordinate.
+    z: `float`
+        The location's Z coordinate.
+    postal_code: `int`
+        The location's postal code.
+    street_name: `str`
+        The location's street name.
+    building_number: `int`
+        The location's building number.
+    """
     postal_code: int
     street_name: str
     building_number: int
@@ -104,6 +127,23 @@ class Location(MinimalLocation):
 # possibly add command model
 
 class Vehicle(BaseModel):
+    """Represents an in-game vehicle.
+    
+    Attributes
+    ----------
+    name: `str`
+        The vehicle's name.
+    owner: `UsernameUser`
+        The vehicle's owner.
+    plate: `str`
+        The vehicle's license plate.
+    texture: `str`
+        The vehicle's texture.
+    color_hex: `str`
+        The vehicle's color in hexadecimal format.
+    color_name: `str`
+        The vehicle's color name.
+    """
     name: str
     owner: UsernameUser
     plate: str
@@ -120,6 +160,27 @@ class Vehicle(BaseModel):
         return v
     
 class EmergencyCall(BaseModel):
+    """Represents an in-game emergency call.
+    
+    Attributes
+    ----------
+    team: `str`
+        The team that received the call.
+    caller: `IdUser`
+        The user who made the call.
+    players: `list[IdUser]`
+        The users involved in the call.
+    position: `MinimalLocation`
+        The location of the call.
+    started_at: `datetime.datetime`
+        The time the call was started.
+    call_number: `int`
+        The number of the call.
+    description: `str`
+        The call's description.
+    position_descriptor: `str`
+        The call's description of the location.
+    """
     team: str
     caller: IdUser
     players: list[IdUser]
@@ -169,22 +230,73 @@ class Log(BaseModel):
         return FullUser.validate_full_user(v)
 
 class JoinLog(Log):
+    """Represents join/leave log.
+    
+    Attributes
+    ----------
+    timestamp: `datetime.datetime`
+        The time the event occurred.
+    user: `FullUser`
+        The user who joined.
+    join: `bool`
+        Whether the user joined or left.
+    """
     user: Annotated[FullUser, Field(alias="Player")]
     join: bool
 
 class KillLog(Log):
+    """Represents a kill log.
+    
+    Attributes
+    ----------
+    timestamp: `datetime.datetime`
+        The time the event occurred.
+    killed: `FullUser`
+        The user who was killed.
+    killer: `FullUser`
+        The user who killed the other user.
+    """
     killed: FullUser
     killer: FullUser
     
 class CommandLog(Log):
+    """Represents a command log.
+    
+    Attributes
+    ----------
+    timestamp: `datetime.datetime`
+        The time the event occurred.
+    user: `FullUser`
+        The user who executed the command.
+    command: `str`
+        The command that was executed.
+    """
     user: Annotated[FullUser, Field(alias="Player")]
     command: str
     
 class ModCall(Log):
+    """Represents a moderator call.
+    
+    Attributes
+    ----------
+    timestamp: `datetime.datetime`
+        The time the event occurred.
+    caller: `FullUser`
+        The user who made the call.
+    moderator: `FullUser`
+        The moderator who responded to the call.
+    """
     caller: FullUser
     moderator: FullUser
     
 class Queue(BaseModel):
+    """Represents a queue of players.
+    
+    Attributes
+    ----------
+    players: `list[IdUser]`
+        The players in the queue.
+    """
     players: list[IdUser]
     
     model_config = ConfigDict(alias_generator=to_pascal, populate_by_name=True, frozen=True)
@@ -200,6 +312,17 @@ class Queue(BaseModel):
         return v
     
 class Staff(BaseModel):
+    """Represents the server's staff members.
+
+    Attributes
+    ----------
+    admins: `list[FullUser]`
+        The server administrators.
+    mods: `list[FullUser]`
+        The server moderators.
+    helpers: `list[FullUser]`
+        The server helpers.
+    """
     admins: list[FullUser]
     mods: list[FullUser]
     helpers: list[FullUser]
@@ -213,6 +336,23 @@ class Staff(BaseModel):
         return v
     
 class Player(BaseModel):
+    """Represents an in-game player.
+
+    Attributes
+    ----------
+    team: `str`
+        The team the player is on.
+    user: `FullUser`
+        The player's `User` object.
+    callsign: `str | None`
+        The player's callsign if on a non-civilian team.
+    location: `Location`
+        The player's current location.
+    permission: `Literal["Normal", "Server Administrator", "Server Owner", "Server Moderator"]`
+        The player's permission level.
+    wanted_stars: `int`
+        The number of wanted stars the player has.
+    """
     team: str
     user: Annotated[FullUser, Field(alias="Player")]
     callsign: Annotated[str | None, Field(default=None)]
