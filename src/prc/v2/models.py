@@ -396,6 +396,51 @@ class _ServerBase(BaseModel):
         return v
 
 class Server(_ServerBase):
+    """Represents a customized server.
+    
+    Properties will raise a `DataNotRequestedError`
+    if the corresponding data has not been requested in the initial request.
+    
+    Attributes
+    ----------
+    name: `str`
+        The name of the server.
+    owner: `IdUser`
+        The owner of the server.
+    co_owners: `list[IdUser]`
+        The co-owners of the server.
+    current_players: `int`
+        The number of players currently on the server.
+    max_players: `int`
+        The maximum number of players that can be on the server.
+    join_key: `str`
+        The server's join code.
+    verification_required: `Literal["Disabled", "Email", "Phone/ID"]`
+        The type of verification required to join the server.
+    team_balance: `bool`
+        Whether or not the server enforces team balance.
+
+    Properties
+    ----------
+    players: `list[Player]`
+        The players currently on the server.
+    staff: `Staff`
+        The staff members of the server.
+    join_logs: `list[JoinLog]`
+        The server's recent join/leave logs.
+    queue: `Queue`
+        The queue of players waiting to join the server.
+    kill_logs: `list[KillLog]`
+        The server's recent kill logs.
+    command_logs: `list[CommandLog]`
+        The server's recent command logs.
+    mod_calls: `list[ModCall]`
+        The server's recent moderation calls.
+    emergency_calls: `list[EmergencyCall]`
+        The server's recent emergency calls.
+    vehicles: `list[Vehicle]`
+        The spawned vehicles on the server.
+    """
     zzz_players: Annotated[list[dict] | None, Field(default=None, alias="Players")]
     zzz_staff: Annotated[dict | None, Field(default=None, alias="Staff")]
     zzz_join_logs: Annotated[list[dict] | None, Field(default=None, alias="JoinLogs")]
@@ -461,6 +506,48 @@ class Server(_ServerBase):
         return [Vehicle.model_validate(vehicle_dict) for vehicle_dict in self.zzz_vehicles]
 
 class BundledServer(_ServerBase):
+    """Represents a server with all available data bundled.
+    
+    Attributes
+    ----------
+    name: `str`
+        The name of the server.
+    owner: `IdUser`
+        The owner of the server.
+    co_owners: `list[IdUser]`
+        The co-owners of the server.
+    current_players: `int`
+        The number of players currently on the server.
+    max_players: `int`
+        The maximum number of players that can be on the server.
+    join_key: `str`
+        The server's join code.
+    verification_required: `Literal["Disabled", "Email", "Phone/ID"]`
+        The type of verification required to join the server.
+    team_balance: `bool`
+        Whether or not the server enforces team balance.
+
+    Properties
+    ----------
+    players: `list[Player]`
+        The players currently on the server.
+    staff: `Staff`
+        The staff members of the server.
+    join_logs: `list[JoinLog]`
+        The server's recent join/leave logs.
+    queue: `Queue`
+        The queue of players waiting to join the server.
+    kill_logs: `list[KillLog]`
+        The server's recent kill logs.
+    command_logs: `list[CommandLog]`
+        The server's recent command logs.
+    mod_calls: `list[ModCall]`
+        The server's recent moderation calls.
+    emergency_calls: `list[EmergencyCall]`
+        The server's recent emergency calls.
+    vehicles: `list[Vehicle]`
+        The spawned vehicles on the server.
+    """
     players: list[Player]
     staff: Staff
     join_logs: list[JoinLog]
