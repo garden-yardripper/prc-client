@@ -1,3 +1,5 @@
+import time
+import asyncio
 from typing import Self, cast
 import httpx
 
@@ -58,6 +60,11 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), AsyncClient)
         
+        # rate limit tracking attributes, updated on each request based on response headers
+        self.post_expiration: int = int(time.time())
+        self.get_remaining: int = 0
+        self.get_expiration: int = int(time.time())
+    
     def _raise_for_status(self, resp: httpx.Response):
         body = resp.json()
         if resp.status_code == 429:
@@ -75,6 +82,18 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
                 raise ApiError.from_dict(body)
             except DeserializationError:
                 raise ApiError(code=resp.status_code, message="API call failed (status not 200).")
+            
+    def _update_ratelimit(self, resp: httpx.Response):
+        headers = resp.headers
+        
+        limit_remaining = headers.get("x-ratelimit-remaining")
+        limit_expiration = headers.get("x-ratelimit-reset")
+        
+        if resp.request.method == "GET":
+            self.get_remaining = int(limit_remaining) or self.get_remaining
+            self.get_expiration = int(limit_expiration) or self.get_expiration
+        else:
+            self.post_expiration = int(limit_expiration) or self.post_expiration
         
     async def _send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
@@ -87,6 +106,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
         resp = await self.connection.request(method, endpoint.value, **kwargs)
         self._raise_for_status(resp)
+        self._update_ratelimit(resp)
             
         return resp
     
@@ -101,8 +121,39 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
         resp = self.connection.request(method, endpoint.value, **kwargs)
         self._raise_for_status(resp)
+        self._update_ratelimit(resp)
         
         return resp
+    
+    @property
+    def get_on_cooldown(self) -> bool:
+        return self.get_remaining <= 0 and self.get_expiration > time.time()
+    
+    @property
+    def post_on_cooldown(self) -> bool:
+        return self.post_expiration > time.time()
+    
+    def wait_for_get_cooldown(self):
+        if self.is_async:
+            raise RuntimeError("Client is not synchronous - use 'await_for_get_cooldown' instead.")
+        if self.get_remaining > 0:
+            time.sleep(max(self.get_expiration - time.time(), 0))
+        
+    async def await_for_get_cooldown(self):
+        if not self.is_async:
+            raise RuntimeError("Client is not async - use 'wait_for_get_cooldown' instead.")
+        if self.get_remaining > 0:
+            await asyncio.sleep(max(self.get_expiration - time.time(), 0))
+            
+    def wait_for_post_cooldown(self):
+        if self.is_async:
+            raise RuntimeError("Client is not synchronous - use 'await_for_get_cooldown' instead.")
+        time.sleep(max(self.post_expiration - time.time(), 0))
+        
+    async def await_for_post_cooldown(self):
+        if not self.is_async:
+            raise RuntimeError("Client is not async - use 'wait_for_get_cooldown' instead.")
+        await asyncio.sleep(max(self.post_expiration - time.time(), 0))
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
