@@ -19,7 +19,13 @@ class CommandPreview(BaseModel):
     reason: str | None
 
 class CommandPolicy:
-    def __init__(self, whitelist: set[str], blacklist: set[str], *, max_length: int = 120) -> None:
+    def __init__(self, *,
+        whitelist: set[str] | None = None,
+        blacklist: set[str] | None = None,
+        max_length: int = 120
+    ) -> None:
+        whitelist = whitelist or set()
+        blacklist = blacklist or set()
         self.whitelist = {normalize_command(cmd) for cmd in whitelist}
         self.blacklist = {normalize_command(cmd) for cmd in blacklist}
         self.max_length = max_length
