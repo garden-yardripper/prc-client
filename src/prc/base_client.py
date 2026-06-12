@@ -59,6 +59,17 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         handle_rate_limit: bool = True,
         connection: HTTPXClient | None = None
     ) -> None:
+        """
+        Parameters
+        ----------
+        server_key: `str`
+            The private server API key.
+        handle_rate_limit: `bool` (optional)
+            Whether to automatically handle rate limiting. Defaults to True.
+        connection: `HTTPXClient` | `None` (optional)
+            An existing HTTPX client to use. If not provided, a new one will be created.
+        """
+        
         from .v2.client import AsyncClient # prevent circular import
         self.server_key: str = server_key
         self.handle_rate_limit = handle_rate_limit
