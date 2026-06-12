@@ -140,6 +140,8 @@ class Log(BaseModel):
         mode="before"
     )
     def user_to_full_user(cls, v):
+        if isinstance(v, str) and v == "Remote Server":
+            return FullUser(name=v, id=0)
         return FullUser.validate_full_user(v)
 
 class JoinLog(Log):
