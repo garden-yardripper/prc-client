@@ -110,7 +110,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
     def close(self):
         if not isinstance(self.connection, httpx.Client):
-            raise RuntimeError("Connection is not an async client; close with .aclose().")
+            raise RuntimeError("Connection is not an sync client; close with .aclose().")
         if self.connection and not self.connection.is_closed:
             self.connection.close()
         
