@@ -48,6 +48,26 @@ class Command(BaseModel):
         """Returns the payload to send this command to the API."""
         return {"command": self.text}
 
+    @property
+    def command(self) -> str:
+        """Returns the command with leading colon (`:h`, `:kick`, etc.)"""
+        return self.text.split()[0]
+    
+    @property
+    def dangerous(self) -> bool:
+        """Returns True if the command is dangerous (e.g. `:kick all`, `:ban all`), else False."""
+        
+        DANGEROUS_CMDS = {
+            ":kick", ":ban", ":wanted", ":unwanted",
+            ":jail", ":unjail", ":kill", ":heal",
+            ":refresh", ":respawn"
+        }
+        
+        return any(
+            self.text.startswith((f"{cmd} all", f"{cmd} others"))
+            for cmd in DANGEROUS_CMDS
+        )
+
 # define user types
 type AnyUserType = Player | FullUser | UsernameUser | IdUser | str | int
 type UsernameUserType = Player | FullUser | UsernameUser | str
