@@ -16,8 +16,7 @@ class AsyncClient(_GetServer, _SendCommand):
         command_logs: bool = False,
         mod_calls: bool = False,
         emergency_calls: bool = False,
-        vehicles: bool = False,
-        immediate: bool = False
+        vehicles: bool = False
     ) -> Server:
         return await self._get_server_async(
             players=players,
@@ -28,16 +27,15 @@ class AsyncClient(_GetServer, _SendCommand):
             command_logs=command_logs,
             mod_calls=mod_calls,
             emergency_calls=emergency_calls,
-            vehicles=vehicles,
-            immediate=immediate
+            vehicles=vehicles
         )
     
-    async def get_bundled_server(self, *, immediate: bool = False) -> BundledServer:
-        return await self._get_bundled_server_async(immediate=immediate)
+    async def get_bundled_server(self) -> BundledServer:
+        return await self._get_bundled_server_async()
     
-    async def send_command(self, command: CommandLike, *, immediate: bool = False) -> Response:
+    async def send_command(self, command: CommandLike) -> Response:
         cmd = command if isinstance(command, str) else command.text
-        return await self._send_command_async(cmd, immediate=immediate)
+        return await self._send_command_async(cmd)
 
 class Client(_GetServer, _SendCommand):
     def get_server(
@@ -50,8 +48,7 @@ class Client(_GetServer, _SendCommand):
         command_logs: bool = False,
         mod_calls: bool = False,
         emergency_calls: bool = False,
-        vehicles: bool = False,
-        immediate: bool = False
+        vehicles: bool = False
     ) -> Server:
         return self._get_server_sync(
             players=players,
@@ -62,13 +59,12 @@ class Client(_GetServer, _SendCommand):
             command_logs=command_logs,
             mod_calls=mod_calls,
             emergency_calls=emergency_calls,
-            vehicles=vehicles,
-            immediate=immediate
+            vehicles=vehicles
         )
     
-    def get_bundled_server(self, *, immediate: bool = False) -> BundledServer:
-        return self._get_bundled_server_sync(immediate=immediate)
+    def get_bundled_server(self) -> BundledServer:
+        return self._get_bundled_server_sync()
     
-    def send_command(self, command: CommandLike, *, immediate: bool = False) -> Response:
+    def send_command(self, command: CommandLike) -> Response:
         cmd = command if isinstance(command, str) else command.text
-        return self._send_command_sync(cmd, immediate=immediate)
+        return self._send_command_sync(cmd)

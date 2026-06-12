@@ -16,8 +16,7 @@ class _GetServer(_BaseApiClient):
         command_logs: bool = False,
         mod_calls: bool = False,
         emergency_calls: bool = False,
-        vehicles: bool = False,
-        immediate: bool = False
+        vehicles: bool = False
     ) -> Server:
         params = _format_bool_params({
             "Players": players,
@@ -33,13 +32,12 @@ class _GetServer(_BaseApiClient):
         
         response = await self._send_async_request(
             endpoint=Endpoint.v2_server,
-            immediate=immediate,
             params=params
         )
         
         return Server.model_validate(response.json())
     
-    async def _get_bundled_server_async(self, *, immediate: bool = False) -> BundledServer:
+    async def _get_bundled_server_async(self) -> BundledServer:
         params = _format_bool_params({
             "Players": True,
             "Staff": True,
@@ -54,14 +52,13 @@ class _GetServer(_BaseApiClient):
         
         response = await self._send_async_request(
             endpoint=Endpoint.v2_server,
-            immediate=immediate,
             params=params
         )
         
         return BundledServer.model_validate(response.json())
     
-    def _get_server_sync(self, *, immediate: bool = False, **kwargs) -> Server:
-        return utils.execute_async(self._get_server_async(immediate=immediate, **kwargs))
+    def _get_server_sync(self, **kwargs) -> Server:
+        return utils.execute_async(self._get_server_async(**kwargs))
         
-    def _get_bundled_server_sync(self, *, immediate: bool = False) -> BundledServer:
-        return utils.execute_async(self._get_bundled_server_async(immediate=immediate))
+    def _get_bundled_server_sync(self) -> BundledServer:
+        return utils.execute_async(self._get_bundled_server_async())

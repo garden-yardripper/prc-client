@@ -100,16 +100,14 @@ In-game commands have type hints/method stubs, but any command can be created th
 and user arguments will be parsed automatically."""
 
 class _SendCommand(_BaseApiClient):
-    async def _send_command_async(self, command: str, *, immediate: bool = False) -> Response:
+    async def _send_command_async(self, command: str) -> Response:
         return await self._send_async_request(
             endpoint=Endpoint.v2_command,
-            immediate=immediate,
             json={"command": normalize_command(command)}
         )
         
-    def _send_command_sync(self, command: str, *, immediate: bool = False) -> Response:
+    def _send_command_sync(self, command: str) -> Response:
         return self._send_sync_request(
             endpoint=Endpoint.v2_command,
-            immediate=immediate,
             json={"command": normalize_command(command)}
         )

@@ -53,9 +53,15 @@ class _SyncContext:
         self.closed = True
 
 class _BaseApiClient(_SyncContext, _AsyncContext):
-    def __init__(self, server_key: str, *, connection: HTTPXClient | None = None) -> None:
+    def __init__(self,
+        server_key: str,
+        *,
+        handle_rate_limit: bool = True,
+        connection: HTTPXClient | None = None
+    ) -> None:
         from .v2.client import AsyncClient # prevent circular import
         self.server_key: str = server_key
+        self.handle_rate_limit = handle_rate_limit
         self.connection: HTTPXClient | None = connection
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), AsyncClient)
@@ -95,7 +101,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         else:
             self.post_expiration = int(limit_expiration) or self.post_expiration
         
-    async def _send_async_request(self, endpoint: Endpoint, immediate: bool = False, **kwargs) -> httpx.Response:
+    async def _send_async_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
@@ -104,7 +110,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send async request; connection is not an async client.")
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
-        if not immediate:
+        if self.handle_rate_limit:
             if method == "GET":
                 if self.get_on_cooldown:
                     await self.await_for_get_cooldown()
@@ -118,7 +124,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             
         return resp
     
-    def _send_sync_request(self, endpoint: Endpoint, immediate: bool = False, **kwargs) -> httpx.Response:
+    def _send_sync_request(self, endpoint: Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
@@ -127,7 +133,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send sync request; connection is not a sync client.")
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
-        if not immediate:
+        if self.handle_rate_limit:
             if method == "GET":
                 if self.get_on_cooldown:
                     self.wait_for_get_cooldown()
