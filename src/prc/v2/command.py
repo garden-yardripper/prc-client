@@ -4,7 +4,9 @@ from httpx import Response
 from pydantic import BaseModel
 from ..v2.models import Endpoint, Player, FullUser, UsernameUser, IdUser
 from ..base_client import _BaseApiClient
-from .client import AsyncClient, Client
+
+if TYPE_CHECKING:
+    from .client import AsyncClient, Client
 
 def normalize_command(command: str) -> str:
     return command if command.startswith(":") else f":{command}"
@@ -12,11 +14,11 @@ def normalize_command(command: str) -> str:
 class Command(BaseModel):
     text: str
     
-    async def asend(self, client: AsyncClient):
+    async def asend(self, client: "AsyncClient"):
         """Sends this command to the API using the provided asynchronous client."""
         return await client.send_command(self)
     
-    def send(self, client: Client) -> Response:
+    def send(self, client: "Client") -> Response:
         """Sends this command to the API using the provided synchronous client."""
         return client.send_command(self)
     
