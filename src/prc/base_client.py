@@ -2,6 +2,7 @@ import time
 import asyncio
 from typing import Self, cast
 import httpx
+from pydantic import BaseModel
 
 from .v2.models import Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
@@ -21,6 +22,12 @@ def create_sync_client(server_key: str, **kwargs) -> httpx.Client:
         headers={"server-key": server_key},
         **kwargs
     )
+
+class RateLimitConfig(BaseModel):
+    wait_for_rate_limit: bool = True
+    retry_on_rate_limit: bool = True
+    
+    max_retries: int = 5
 
 class _AsyncContext:
     server_key: str
@@ -56,7 +63,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def __init__(self,
         server_key: str,
         *,
-        handle_rate_limit: bool = True,
+        rate_limit_config: RateLimitConfig = RateLimitConfig(),
         connection: HTTPXClient | None = None
     ) -> None:
         """
@@ -64,15 +71,15 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         ----------
         server_key: `str`
             The private server API key.
-        handle_rate_limit: `bool` (optional)
-            Whether to automatically handle rate limiting. Defaults to True.
+        rate_limit_config: `RateLimitConfig` (optional)
+            The rate limit configuration for this client. Defaults to safe values.
         connection: `HTTPXClient` | `None` (optional)
             An existing HTTPX client to use. If not provided, a new one will be created.
         """
         
         from .v2.client import AsyncClient # prevent circular import
         self.server_key: str = server_key
-        self.handle_rate_limit = handle_rate_limit
+        self.rate_limit_config = rate_limit_config
         self.connection: HTTPXClient | None = connection
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), AsyncClient)
@@ -121,7 +128,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send async request; connection is not an async client.")
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
-        if self.handle_rate_limit:
+        if self.rate_limit_config.wait_for_rate_limit:
             if method == "GET":
                 if self.get_on_cooldown:
                     await self.await_for_get_cooldown()
@@ -144,7 +151,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send sync request; connection is not a sync client.")
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
-        if self.handle_rate_limit:
+        if self.rate_limit_config.wait_for_rate_limit:
             if method == "GET":
                 if self.get_on_cooldown:
                     self.wait_for_get_cooldown()
