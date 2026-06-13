@@ -1,6 +1,9 @@
 import logging
-from prc.ext.policy.policy import CommandPreview
-from prc.command import Command
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .ext.policy.policy import CommandPreview
+    from .command import Command
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +28,15 @@ class CommandPolicyViolation(PRCError):
     reason: `str` | `None`
         The reason the command is not allowed.
     """
-    def __init__(self, command: Command, allowed: bool, reason: str | None = None) -> None:
-        self.command: Command = command
+    def __init__(self, command: "Command", allowed: bool, reason: str | None = None) -> None:
+        self.command: "Command" = command
         self.allowed: bool = allowed
         self.reason: str | None = reason
         super().__init__(f"{allowed=}: {self.reason}")
         
     @classmethod
-    def from_preview(cls, preview: CommandPreview):
+    def from_preview(cls, preview: "CommandPreview"):
+        # Use the provided preview's Command directly to avoid circular imports.
         return cls(preview.command, preview.allowed, preview.reason)
         
 

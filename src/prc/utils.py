@@ -1,4 +1,4 @@
-from prc.v2.models import Location, MinimalLocation, Player, EmergencyCall
+from .v2.models import Location, MinimalLocation, Player, EmergencyCall
 import math
 
 type PositionLike = Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float]
