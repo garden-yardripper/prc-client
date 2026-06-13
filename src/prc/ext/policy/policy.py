@@ -42,6 +42,23 @@ class CommandPolicy:
         self.max_length = max_length
     
     def preview_command(self, command: CommandLike, *, raise_for_status: bool = False) -> CommandPreview:
+        """Previews a command against this policy, returning a `CommandPreview` object
+        or raising a `CommandPolicyViolation` if the command is not allowed and `raise_for_status` is `True`.
+        
+        This importantly does **NOT** send a request to the API.
+
+        Parameters
+        ----------
+        command: `CommandLike`
+            The command to preview.
+        raise_for_status: `bool` (optional)
+            Whether to raise a `CommandPolicyViolation` if the command is not allowed. Defaults to `False`.
+
+        Returns
+        -------
+        `CommandPreview`
+            The preview of the command.
+        """
         if isinstance(command, str):
             command = Command(text=command)
         
