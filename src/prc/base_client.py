@@ -5,6 +5,7 @@ from typing import Self, cast
 import httpx
 from dataclasses import dataclass
 
+from .policy import CommandPolicy
 from .v2.models import Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
 
@@ -65,6 +66,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def __init__(self,
         server_key: str,
         *,
+        policy: CommandPolicy | None = None,
         rate_limit_config: RateLimitConfig = RateLimitConfig(),
         connection: HTTPXClient | None = None
     ) -> None:
@@ -73,6 +75,8 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         ----------
         server_key: `str`
             The private server API key.
+        policy: `CommandPolicy` | `None` (optional)
+            The optional command policy to use to validate commands. Raises `CommandPolicyViolation` on violations.
         rate_limit_config: `RateLimitConfig` (optional)
             The rate limit configuration for this client. Defaults to safe values.
         connection: `HTTPXClient` | `None` (optional)
@@ -81,6 +85,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         from .v2.client import AsyncClient # prevent circular import
         self.server_key: str = server_key
+        self.policy = policy
         self.rate_limit_config = rate_limit_config
         self.connection: HTTPXClient | None = connection
         self.closed: bool = False

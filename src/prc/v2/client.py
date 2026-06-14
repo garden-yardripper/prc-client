@@ -51,8 +51,9 @@ class AsyncClient(_GetServer, _SendCommand):
         `Response`
             The raw HTTPX response from the server.
         """
-        cmd = command if isinstance(command, str) else command.text
-        return await self._send_command_async(cmd)
+        if self.policy:
+            self.policy.preview_command(command, raise_for_status=True)
+        return await self._send_command_async(command)
 
 class Client(_GetServer, _SendCommand):
     """Synchronous client for the ER:LC private server API."""
@@ -99,5 +100,6 @@ class Client(_GetServer, _SendCommand):
         `Response`
             The raw HTTPX response from the server.
         """
-        cmd = command if isinstance(command, str) else command.text
-        return self._send_command_sync(cmd)
+        if self.policy:
+            self.policy.preview_command(command, raise_for_status=True)
+        return self._send_command_sync(command)

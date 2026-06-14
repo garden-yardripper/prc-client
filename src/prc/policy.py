@@ -64,13 +64,13 @@ class CommandPolicy:
             command = Command(text=command)
         
         if command.command in self.blacklist:
-            preview = CommandPreview(command=command, allowed=False, reason="Command blacklisted")
+            preview = CommandPreview(command, allowed=False, reason="Command blacklisted")
         elif command.command not in self.whitelist:
-            preview = CommandPreview(command=command, allowed=False, reason="Command not whitelisted")
+            preview = CommandPreview(command, allowed=False, reason="Command not whitelisted")
         elif len(command.text) > self.max_length:
-            preview = CommandPreview(command=command, allowed=False, reason="Command too long")
+            preview = CommandPreview(command, allowed=False, reason="Command too long")
         else:
-            preview = CommandPreview(command=command, allowed=True, reason=None)
+            preview = CommandPreview(command, allowed=True, reason=None)
         
         if raise_for_status and not preview.allowed:
             raise CommandPolicyViolation.from_preview(preview)
