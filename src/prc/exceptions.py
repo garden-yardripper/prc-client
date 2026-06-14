@@ -2,7 +2,7 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .ext.policy.policy import CommandPreview
+    from .policy import CommandPreview
     from .command import Command
 
 logger = logging.getLogger(__name__)

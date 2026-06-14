@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from ...command import Command, CommandLike, normalize_command
-from ...exceptions import CommandPolicyViolation
+from .command import Command, CommandLike, normalize_command
+from .exceptions import CommandPolicyViolation
 
 @dataclass
 class CommandPreview:
