@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 from ...command import Command, CommandLike, normalize_command
 from ...exceptions import CommandPolicyViolation
 
-class CommandPreview(BaseModel):
+@dataclass
+class CommandPreview:
     """Represents the result of a command preview.
     
     Attributes
