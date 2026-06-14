@@ -1,3 +1,4 @@
+import threading
 import time
 import asyncio
 from typing import Self, cast
@@ -89,6 +90,11 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.post_expiration: int = int(time.time())
         self.get_remaining: int = 0
         self.get_expiration: int = int(time.time())
+        
+        if self.is_async:
+            self.lock = asyncio.Lock()
+        else:
+            self.lock = threading.Lock()
     
     def _raise_for_status(self, resp: httpx.Response):
         body = resp.json()
@@ -130,16 +136,23 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
         if self.rate_limit_config.wait_for_rate_limit:
-            if method == "GET":
-                if self.get_on_cooldown:
-                    await self.await_for_get_cooldown()
-            else:
-                if self.post_on_cooldown:
-                    await self.await_for_post_cooldown()
-        
+            async with cast(asyncio.Lock, self.lock):
+                if method == "GET":
+                    if self.get_on_cooldown:
+                        await self.await_for_get_cooldown()
+                else:
+                    if self.post_on_cooldown:
+                        await self.await_for_post_cooldown()
+                        
+                resp = await self.connection.request(method, endpoint.value, **kwargs)
+                self._update_ratelimit(resp)
+                self._raise_for_status(resp)
+                
+                return resp
+            
         resp = await self.connection.request(method, endpoint.value, **kwargs)
-        self._raise_for_status(resp)
         self._update_ratelimit(resp)
+        self._raise_for_status(resp)
             
         return resp
     
@@ -153,16 +166,23 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         method = "GET" if endpoint == Endpoint.v2_server else "POST"
         if self.rate_limit_config.wait_for_rate_limit:
-            if method == "GET":
-                if self.get_on_cooldown:
-                    self.wait_for_get_cooldown()
-            else:
-                if self.post_on_cooldown:
-                    self.wait_for_post_cooldown()
-        
+            with cast(threading.Lock, self.lock):
+                if method == "GET":
+                    if self.get_on_cooldown:
+                        self.wait_for_get_cooldown()
+                else:
+                    if self.post_on_cooldown:
+                        self.wait_for_post_cooldown()
+                        
+                resp = self.connection.request(method, endpoint.value, **kwargs)
+                self._update_ratelimit(resp)
+                self._raise_for_status(resp)
+
+                return resp
+            
         resp = self.connection.request(method, endpoint.value, **kwargs)
-        self._raise_for_status(resp)
         self._update_ratelimit(resp)
+        self._raise_for_status(resp)
         
         return resp
     
