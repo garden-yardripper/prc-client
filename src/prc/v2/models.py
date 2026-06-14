@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from pydantic.alias_generators import to_pascal
 from ..exceptions import DataNotRequestedError
+from ..users import FullUser, UsernameUser, IdUser
 
 class Endpoint(StrEnum):
     v2_server = "/v2/server"
@@ -13,71 +14,6 @@ class Endpoint(StrEnum):
     fall_postals_map = "/maps/fall_postals.png"
     winter_blank_map = "/maps/snow_blank.png"
     winter_postals_map = "/maps/snow_postals.png"
-
-class UsernameUser(BaseModel):
-    """Represents a user returned by the API with only a username.
-    
-    Attributes
-    ----------
-    name: `str`
-        The user's username.
-    """
-    name: str
-    
-    model_config = ConfigDict(frozen=True)
-    
-    def __str__(self):
-        return self.name
-
-class IdUser(BaseModel):
-    """Represents a user returned by the API with only an ID.
-    
-    Attributes
-    ----------
-    id: `int`
-        The user's ID.
-    """
-    id: int
-    
-    model_config = ConfigDict(frozen=True)
-    
-    def __int__(self):
-        return self.id
-    
-    def __str__(self):
-        return str(self.id)
-
-class FullUser(BaseModel):
-    """Represents a user returned by the API with a username and ID.
-    
-    Attributes
-    ----------
-    name: `str`
-        The user's username.
-    id: `int`
-        The user's ID.
-    """
-    name: str
-    id: int
-    
-    model_config = ConfigDict(frozen=True)
-    
-    @classmethod
-    def from_delimited(cls, delimited: str):
-        name, id = delimited.split(":", maxsplit=1)
-        return cls(name=name, id=int(id))
-    
-    @classmethod
-    def validate_full_user(cls, v):
-        if isinstance(v, str):
-            return cls.from_delimited(v)
-        return v
-    
-    def __str__(self):
-        return f"{self.name}:{self.id}"
-    
-    def __int__(self):
-        return int(self.id)
 
 class MinimalLocation(BaseModel):
     """Represents a location with minimal information.
@@ -226,7 +162,7 @@ class Log(BaseModel):
     def user_to_full_user(cls, v):
         if isinstance(v, str) and v == "Remote Server":
             return FullUser(name=v, id=0)
-        return FullUser.validate_full_user(v)
+        return FullUser.from_delimited(v)
 
 class JoinLog(Log):
     """Represents join/leave log.
@@ -363,7 +299,7 @@ class Player(BaseModel):
     
     @field_validator("user", mode="before")
     def user_to_full_user(cls, v):
-        return FullUser.validate_full_user(v)
+        return FullUser.from_delimited(v)
     
     @field_validator("location", mode="before")
     def validate_location(cls, v):
