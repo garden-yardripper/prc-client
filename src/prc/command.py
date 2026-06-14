@@ -3,13 +3,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 from httpx import Response
 from .v2.models import (
-    Endpoint as V2Endpoint,
     Player as V2Player,
     FullUser as V2FullUser,
     UsernameUser as V2UsernameUser,
     IdUser as V2IdUser
 )
-from .base_client import _BaseApiClient
 
 if TYPE_CHECKING:
     from .v2.client import AsyncClient as V2AsyncClient, Client as V2Client
@@ -158,16 +156,3 @@ Used to build commands, such as `cmd.hint("Hello, World!")` or `cmd.kick(["playe
 
 In-game commands have type hints/method stubs, but any command can be created the same way
 and user arguments will be parsed automatically."""
-
-class _SendCommand(_BaseApiClient):
-    async def _send_command_async(self, command: str) -> Response:
-        return await self._send_async_request(
-            endpoint=V2Endpoint.v2_command,
-            json={"command": normalize_command(command)}
-        )
-        
-    def _send_command_sync(self, command: str) -> Response:
-        return self._send_sync_request(
-            endpoint=V2Endpoint.v2_command,
-            json={"command": normalize_command(command)}
-        )
