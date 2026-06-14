@@ -2,7 +2,7 @@ import pytest
 from prc.command import Command
 from prc.exceptions import CommandPolicyViolation
 from prc.policy import CommandPolicy
-from prc.v2.client import Client
+from prc.v2.client import AsyncClient, Client
 from prc.v2 import cmd
 
 def test_policy_params():
@@ -38,3 +38,10 @@ def test_policy_client_raises():
     
     with pytest.raises(CommandPolicyViolation):
         client.send_command(cmd.m("message"))
+        
+async def test_policy_async_client_raises():
+    policy = CommandPolicy(blacklist={"m"})
+    client = AsyncClient("server-key", policy=policy)
+    
+    with pytest.raises(CommandPolicyViolation):
+        await client.send_command(cmd.m("message"))
