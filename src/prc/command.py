@@ -22,8 +22,8 @@ def normalize_command(command: str) -> str:
 class Command:
     """Represents an in-game command.
     
-    This model is not meant to be instantiated directly;
-    instead, import and use the `cmd` instance to dynamically create `Command` objects:
+    You should import and use the `cmd` instance to dynamically create `Command` objects
+    instead of instantiating this class directly:
     
     ```python
     from prc.v2 import cmd
