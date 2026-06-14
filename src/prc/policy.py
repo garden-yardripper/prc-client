@@ -23,7 +23,7 @@ class CommandPolicy:
     def __init__(self, *,
         whitelist: set[str] | None = None,
         blacklist: set[str] | None = None,
-        max_length: int = 120
+        max_length: int | None = None
     ) -> None:
         """Initialize a new CommandPolicy.
 
@@ -67,7 +67,7 @@ class CommandPolicy:
             preview = CommandPreview(command, allowed=False, reason="Command blacklisted")
         elif command.command not in self.whitelist:
             preview = CommandPreview(command, allowed=False, reason="Command not whitelisted")
-        elif len(command.text) > self.max_length:
+        elif self.max_length and len(command.text) > self.max_length:
             preview = CommandPreview(command, allowed=False, reason="Command too long")
         else:
             preview = CommandPreview(command, allowed=True, reason=None)
