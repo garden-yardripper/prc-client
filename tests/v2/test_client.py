@@ -1,6 +1,10 @@
+import json
+
+import httpx
 import pytest
 import datetime
 import respx
+from prc.exceptions import ApiError, RateLimited
 from prc.v2.client import AsyncClient, Client
 from prc.v2.models import BundledServer
 
@@ -110,6 +114,9 @@ def test_get_bundled_server_sync(payload: dict, respx_mock: respx.MockRouter):
     assert isinstance(server, BundledServer)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
+    assert client.get_remaining == 10
+    assert client.get_expiration == 9999999
+    
     assert server.name == "API Test"
     assert server.co_owners[0].id == 123
     
@@ -137,6 +144,9 @@ async def test_get_bundled_server_async(payload: dict, respx_mock: respx.MockRou
     assert isinstance(server, BundledServer)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
+    assert client.get_remaining == 10
+    assert client.get_expiration == 9999999
+    
     assert server.name == "API Test"
     assert server.co_owners[0].id == 123
     
@@ -149,3 +159,16 @@ async def test_get_bundled_server_async(payload: dict, respx_mock: respx.MockRou
     assert isinstance(server.join_logs[0].timestamp, datetime.datetime)
     
     assert server.queue.length == 1
+
+def test_raise_for_status():
+    client = Client("server-key")
+    
+    ratelimit_body = {"code": 429, "message": "rate limited", "retry_after": 1}
+    ratelimit_resp = httpx.Response(429, content=json.dumps(ratelimit_body).encode("utf-8"))
+    with pytest.raises(RateLimited):
+        client._raise_for_status(ratelimit_resp)
+        
+    error_body = {"code": 500, "message": "random error"}
+    error_resp = httpx.Response(429, content=json.dumps(error_body).encode("utf-8"))
+    with pytest.raises(ApiError):
+        client._raise_for_status(error_resp)
