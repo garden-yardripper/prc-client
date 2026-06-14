@@ -8,10 +8,33 @@ from prc.v2.models import EmergencyCall
 
 @dataclass
 class CustomCommand:
+    """Represents a custom `;` in-game command.
+    
+    Attributes
+    ----------
+    command: `str`
+        The main command that was executed by the user.
+    argument: `str`
+        The command's arguments (the rest of the line after the command).
+    """
     command: str
     argument: str
 
 class Event(BaseModel):
+    """Represents an in-game event.
+    
+    Use the `emergency_call` and `command` properties to obtain specific data on the event.
+    Ensure to check the `event_type` before doing so to prevent accessing invalid data.
+    
+    Attributes
+    ----------
+    timestamp: `int`
+        The event's timestamp as a unix timestamp.
+    origin: `str`
+        The origin of the event. In the case of custom commands, this will be the command user's ID as a string.
+    event_type: `Literal["EmergencyCallStarted", "WebhookProbe", "CustomCommand"]`
+        The event's type.
+    """
     zzz_data: Annotated[dict, Field(alias="data")]
     timestamp: datetime.datetime
     event_type: Annotated[
@@ -46,5 +69,14 @@ class Event(BaseModel):
         return CustomCommand(cmd, argument)
 
 class EventBatch(BaseModel):
+    """Represents a batch of events sent by the webhook.
+    
+    Attributes
+    ----------
+    events: `list[Event]`
+        The list of events in the batch.
+    server: `str`
+        The server to which the events belong (Base64 string).
+    """
     events: list[Event]
     server: str
