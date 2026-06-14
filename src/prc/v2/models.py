@@ -14,11 +14,6 @@ class Endpoint(StrEnum):
     winter_blank_map = "/maps/snow_blank.png"
     winter_postals_map = "/maps/snow_postals.png"
 
-def _validate_datetime(v):
-    if isinstance(v, int):
-        return datetime.datetime.fromtimestamp(v)
-    return v
-
 class UsernameUser(BaseModel):
     """Represents a user returned by the API with only a username.
     
@@ -208,7 +203,9 @@ class EmergencyCall(BaseModel):
     
     @field_validator("started_at", mode="before")
     def timestamp_to_datetime(cls, v):
-        return _validate_datetime(v)
+        if isinstance(v, int):
+            return datetime.datetime.fromtimestamp(v)
+        return v
     
 class Log(BaseModel):
     timestamp: datetime.datetime
@@ -217,7 +214,9 @@ class Log(BaseModel):
     
     @field_validator("timestamp", mode="before")
     def timestamp_to_datetime(cls, v):
-        return _validate_datetime(v)
+        if isinstance(v, int):
+            return datetime.datetime.fromtimestamp(v)
+        return v
     
     @field_validator(
         "user", "killed", "killer", "caller", "moderator",
