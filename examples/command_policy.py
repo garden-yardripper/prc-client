@@ -1,6 +1,6 @@
 import prc
 from prc.command import cmd
-from prc.ext.policy import CommandPolicy
+from prc.policy import CommandPolicy
 
 # Only allow hint and message commands
 # Blacklist set takes priority over whitelist
