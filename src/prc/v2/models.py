@@ -1,11 +1,11 @@
 import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from pydantic.alias_generators import to_pascal
 from ..exceptions import DataNotRequestedError
 
-class Endpoint(Enum):
+class Endpoint(StrEnum):
     v2_server = "/v2/server"
     v2_command = "/v2/server/command"
     
