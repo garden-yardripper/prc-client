@@ -1,8 +1,8 @@
 import datetime
 from enum import StrEnum
 from typing import Annotated, Literal
-from pydantic import BaseModel, Field, ConfigDict, field_validator
-from pydantic.alias_generators import to_pascal
+from pydantic import AliasChoices, AliasGenerator, BaseModel, Field, ConfigDict, field_validator
+from pydantic.alias_generators import to_pascal, to_camel
 from ..exceptions import DataNotRequestedError
 from ..users import FullUser, UsernameUser, IdUser
 
@@ -121,7 +121,15 @@ class EmergencyCall(BaseModel):
     description: str
     position_descriptor: str
     
-    model_config = ConfigDict(alias_generator=to_pascal, populate_by_name=True, frozen=True)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(
+            validation_alias=lambda f_name: AliasChoices(
+                to_pascal(f_name), to_camel(f_name)
+            )
+        ),
+        populate_by_name=True,
+        frozen=True
+    )
     
     @field_validator("caller", "players", mode="before")
     def caller_to_id_user(cls, v):
