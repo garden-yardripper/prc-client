@@ -1,7 +1,7 @@
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 from httpx import Response
-from pydantic import BaseModel, field_validator
 from .v2.models import (
     Endpoint as V2Endpoint,
     Player as V2Player,
@@ -18,7 +18,8 @@ def normalize_command(command: str) -> str:
     """Normalize a command by ensuring it starts with a colon."""
     return command if command.startswith(":") else f":{command}"
 
-class Command(BaseModel):
+@dataclass
+class Command:
     """Represents an in-game command.
     
     This model is not meant to be instantiated directly;
@@ -43,9 +44,8 @@ class Command(BaseModel):
         ":refresh", ":respawn"
     }
     
-    @field_validator("text", mode="after")
-    def normalize_text(cls, v):
-        return normalize_command(v)
+    def __post_init__(self) -> None:
+        self.text = normalize_command(self.text)
     
     async def asend(self, client: "V2AsyncClient"):
         """Sends this command to the API using the provided asynchronous client."""
