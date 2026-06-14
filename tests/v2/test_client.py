@@ -1,7 +1,7 @@
 import pytest
 import datetime
 import respx
-from prc.v2.client import Client
+from prc.v2.client import AsyncClient, Client
 from prc.v2.models import BundledServer
 
 @pytest.fixture
@@ -105,6 +105,33 @@ def test_get_bundled_server_sync(payload: dict, respx_mock: respx.MockRouter):
     
     client = Client("server-key")
     server = client.get_bundled_server()
+    
+    assert route.called
+    assert isinstance(server, BundledServer)
+    assert route.calls[0].request.headers["server-key"] == "server-key"
+    
+    assert server.name == "API Test"
+    assert server.co_owners[0].id == 123
+    
+    assert len(server.players) == 1
+    assert server.players[0].user.name == "PlayerName"
+    assert server.players[0].location.street_name == "Park Street"
+    
+    assert str(server.staff.admins[0]) == "Black_Hallow:54249787"
+    
+    assert isinstance(server.join_logs[0].timestamp, datetime.datetime)
+    
+    assert server.queue.length == 1
+    
+@respx.mock
+async def test_get_bundled_server_async(payload: dict, respx_mock: respx.MockRouter):
+    route = respx_mock.get("https://api.erlc.gg/v2/server").respond(200,
+        headers={"x-ratelimit-remaining":"10", "x-ratelimit-reset":"9999999"},
+        json=payload
+    )
+    
+    client = AsyncClient("server-key")
+    server = await client.get_bundled_server()
     
     assert route.called
     assert isinstance(server, BundledServer)
