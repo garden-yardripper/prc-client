@@ -1,9 +1,11 @@
+import pytest
 import datetime
 import respx
 from prc.v2.client import Client
 from prc.v2.models import BundledServer
 
-def make_bundled_payload():
+@pytest.fixture
+def payload():
     # Slightly modified version of PRC API docs' example response
     return {
         "Name": "API Test",
@@ -95,10 +97,10 @@ def make_bundled_payload():
     }
 
 @respx.mock
-def test_get_bundled_server_sync(respx_mock: respx.MockRouter):
+def test_get_bundled_server_sync(payload: dict, respx_mock: respx.MockRouter):
     route = respx_mock.get("https://api.erlc.gg/v2/server").respond(200,
         headers={"x-ratelimit-remaining":"10", "x-ratelimit-reset":"9999999"},
-        json=make_bundled_payload()
+        json=payload
     )
     
     client = Client("server-key")
