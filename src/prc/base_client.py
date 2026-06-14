@@ -2,7 +2,7 @@ import time
 import asyncio
 from typing import Self, cast
 import httpx
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 from .v2.models import Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
@@ -23,7 +23,8 @@ def create_sync_client(server_key: str, **kwargs) -> httpx.Client:
         **kwargs
     )
 
-class RateLimitConfig(BaseModel):
+@dataclass
+class RateLimitConfig:
     wait_for_rate_limit: bool = True
     retry_on_rate_limit: bool = True
     
