@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import binascii
 from itertools import chain
@@ -79,21 +78,6 @@ class Router:
             if event_type in self._handlers:
                 for func in self._handlers[event_type]:
                     await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
-
-    def _dispatch(self, batch: EventBatch):
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            pass
-        else:
-            # disallow calling dispatch from an async context,
-            # force users to use dispatch_async to avoid accidentally blocking the event loop
-            raise RuntimeError(
-                "dispatch() cannot be called from an async context. "
-                "Use await dispatch_async()."
-            )
-
-        asyncio.run(self._dispatch_async(batch))
     
     def _verify_prc_request(self, raw_body: bytes, headers: dict):
         normalized_headers = {k.lower(): v for k, v in headers.items()}
