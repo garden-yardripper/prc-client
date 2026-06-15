@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from ..users import IdUser
 from ..v2.models import EmergencyCall
 
 @dataclass
@@ -51,12 +52,14 @@ class Event(BaseModel):
     
     @property
     def emergency_call(self) -> EmergencyCall:
+        """`EmergencyCall`: The emergency call data associated with this event."""
         if self.event_type != "EmergencyCallStarted":
             raise ValueError("This event is not an emergency call.")
         return EmergencyCall.model_validate(self.zzz_data)
     
     @property
     def command(self) -> CustomCommand:
+        """`CustomCommand`: The custom command data associated with this event."""
         if self.event_type != "CustomCommand":
             raise ValueError("This event is not a custom command.")
         
@@ -67,6 +70,13 @@ class Event(BaseModel):
             raise ValueError("Malformed command data (missing command or argument).")
         
         return CustomCommand(cmd, argument)
+    
+    @property
+    def user(self) -> IdUser:
+        """`IdUser`: The user who executed the custom command. Only available for custom command events."""
+        if self.event_type != "CustomCommand":
+            raise ValueError("This event is not a custom command.")
+        return IdUser(id=int(self.origin))
 
 class EventBatch(BaseModel):
     """Represents a batch of events sent by the webhook.
