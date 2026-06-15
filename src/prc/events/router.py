@@ -2,7 +2,7 @@ from typing import Callable, Literal
 
 ANY_COMMAND = object()
 
-class Dispatcher:
+class Router:
     def __init__(self) -> None:
         self.handlers: dict[str, list[Callable]] = {}
         self.commands: dict[str | object, list[Callable]]
