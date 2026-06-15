@@ -76,22 +76,34 @@ def test_event_validation():
         
 async def test_router_command_handlers():
     router = Router()
+    emergency_start_called = False
+    logging_command_called = False
+    any_cmd_called = False
     
     @router.on.emergency_start()
     def emergency_start(e: Event):
+        nonlocal emergency_start_called
         assert isinstance(e, Event)
         assert e.event_type == "EmergencyCallStarted"
+        emergency_start_called = True
     
     @router.on.command("logging")
     async def logging_command(e: Event):
+        nonlocal logging_command_called
         assert isinstance(e, Event)
         assert e.event_type == "CustomCommand"
+        logging_command_called = True
     
     @router.on.any_custom_command()
     def any_cmd(e: Event):
+        nonlocal any_cmd_called
         assert e.event_type == "CustomCommand"
+        any_cmd_called = True
     
     emergency = EventBatch.model_validate(emergency_call())
     command = EventBatch.model_validate(custom_command())
-    
     await router.dispatch_async([emergency, command])
+    
+    assert emergency_start_called is True
+    assert logging_command_called is True
+    assert any_cmd_called is True
