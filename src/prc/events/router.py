@@ -1,11 +1,19 @@
 from typing import Callable, Literal
+from itertools import chain
+import asyncio
+
+from .decorators import _On
+from .models import EventBatch
+from ..utils import maybe_coro
 
 ANY_COMMAND = object()
 
 class Router:
     def __init__(self) -> None:
         self.handlers: dict[str, list[Callable]] = {}
-        self.commands: dict[str | object, list[Callable]]
+        self.commands: dict[str | object, list[Callable]] = {}
+        
+        self.on = _On(self)
         
     def add_function(self,
         func: Callable,
@@ -17,3 +25,33 @@ class Router:
         if name:
             self.commands.setdefault(name, []).append(func)
         self.commands.setdefault(ANY_COMMAND, []).append(func)
+    
+    async def dispatch_async(self, events: list[EventBatch]):
+        for e in chain.from_iterable(batch.events for batch in events):
+            event_type = e.event_type
+            if event_type == "CustomCommand":
+                # run command handlers
+                command_name = e.command.command
+                if command_name in self.commands:
+                    for func in self.commands[command_name]:
+                        await maybe_coro(func)
+            
+            # run other event handlers
+            if event_type in self.handlers:
+                for func in self.handlers[event_type]:
+                    await maybe_coro(func)
+
+    def dispatch(self, events):
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            pass
+        else:
+            # disallow calling dispatch from an async context,
+            # force users to use dispatch_async to avoid accidentally blocking the event loop
+            raise RuntimeError(
+                "dispatch() cannot be called from an async context. "
+                "Use await dispatch_async()."
+            )
+
+        asyncio.run(self.dispatch_async(events))
