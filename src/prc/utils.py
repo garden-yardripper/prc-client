@@ -43,6 +43,7 @@ def get_distance_between_locations(
 async def maybe_coro[T](
     func: Callable[..., T] | Awaitable[T] | Callable[..., Awaitable[T]],
     *args,
+    sync_to_thread: bool = True,
     **kwargs,
 ) -> T:
     """A utility to call `func` with the given arguments and await the result if needed,
@@ -71,7 +72,10 @@ async def maybe_coro[T](
         return await func(*args, **kwargs)
     
     if callable(func):
-        result = await asyncio.to_thread(func, *args, **kwargs)
+        if sync_to_thread:
+            result = await asyncio.to_thread(func, *args, **kwargs)
+        else:
+            result = func(*args, **kwargs)
         if inspect.isawaitable(result):
             return await result
         return result

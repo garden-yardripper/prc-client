@@ -75,7 +75,7 @@ def test_event_validation():
         command.events[0].emergency_call
         
 async def test_router_command_handlers():
-    router = Router()
+    router = Router(sync_handlers_to_thread=False)
     emergency_start_called = False
     logging_command_called = False
     any_cmd_called = False

@@ -15,7 +15,19 @@ from .models import EventBatch
 ANY_COMMAND = object()
 
 class Router:
-    def __init__(self) -> None:
+    def __init__(self, sync_handlers_to_thread: bool = True) -> None:
+        """Initialize a new `Router` instance.
+        
+        Use the `router.on` decorators to register event handlers.
+        
+        Arguments
+        ----------
+        sync_handlers_to_thread: `bool` (optional)
+            Whether to run synchronous handlers in a separate thread.
+            Setting to `False` will cause synchronous handlers to block the event loop.
+            Defaults to `True`.
+        """
+        self.sync_handlers_to_thread = sync_handlers_to_thread
         self._handlers: dict[str, list[Callable]] = {}
         self._commands: dict[str | object, list[Callable]] = {}
         
@@ -57,13 +69,16 @@ class Router:
                 if event_type == "CustomCommand":
                     # run command handlers
                     command_name = e.command.command
-                    for func in chain(self._commands.get(command_name, []), self._commands.get(ANY_COMMAND, [])):
-                        await maybe_coro(func, e)
+                    for func in chain(
+                        self._commands.get(command_name, []),
+                        self._commands.get(ANY_COMMAND, [])
+                    ):
+                        await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
             
                 # run other event handlers
                 if event_type in self._handlers:
                     for func in self._handlers[event_type]:
-                        await maybe_coro(func, e)
+                        await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
 
     def _dispatch(self, events):
         try:
