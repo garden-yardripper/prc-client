@@ -23,21 +23,18 @@ class CommandPolicyViolation(PRCError):
     ----------
     command: `Command`
         The preview's Command object.
-    allowed: `bool`
-        Whether the command violates the command policy.
     reason: `str` | `None`
         The reason the command is not allowed.
     """
-    def __init__(self, command: "Command", allowed: bool, reason: str | None = None) -> None:
+    def __init__(self, command: "Command", reason: str | None = None) -> None:
         self.command: "Command" = command
-        self.allowed: bool = allowed
         self.reason: str | None = reason
-        super().__init__(f"{allowed=}: {self.reason}")
+        super().__init__(f"CommandPolicyViolation: {self.reason}")
         
     @classmethod
     def from_preview(cls, preview: "CommandPreview"):
         # Use the provided preview's Command directly to avoid circular imports.
-        return cls(preview.command, preview.allowed, preview.reason)
+        return cls(preview.command, preview.reason)
         
 
 class ApiError(PRCError):
