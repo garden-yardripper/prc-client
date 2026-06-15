@@ -37,19 +37,6 @@ class Router:
         
         self.on = _On(self)
     
-    def _verify_signature(self, raw_body: bytes, sighex: str, timestamp: str) -> bool:
-        if not isinstance(self._public_key, Ed25519PublicKey):
-            return False
-        
-        message = timestamp.encode() + raw_body
-        sighex_bytes = binascii.unhexlify(sighex)
-        
-        try:
-            self._public_key.verify(sighex_bytes, message)
-            return True
-        except InvalidSignature:
-            return False    
-    
     def _add_function(self,
         func: Callable,
         event_type: Literal["EmergencyCallStarted", "WebhookProbe"] | str
@@ -61,6 +48,34 @@ class Router:
             self._commands.setdefault(name, []).append(func)
         else:
             self._commands.setdefault(ANY_COMMAND, []).append(func)
+    
+    def _decode_verified_body(self, raw_body: bytes) -> EventBatch:
+        return EventBatch.model_validate(raw_body.decode())
+    
+    def _verify_signature(self, raw_body: bytes, sighex: str, timestamp: str) -> bool:
+        if not isinstance(self._public_key, Ed25519PublicKey):
+            return False
+        
+        message = timestamp.encode() + raw_body
+        sighex_bytes = binascii.unhexlify(sighex)
+        
+        try:
+            self._public_key.verify(sighex_bytes, message)
+            return True
+        except InvalidSignature:
+            return False 
+            
+    def _verify_prc_request(self, raw_body: bytes, headers: dict):
+        normalized_headers = {k.lower(): v for k, v in headers.items()}
+        sighex = normalized_headers.get("x-signature-ed25519")
+        timestamp = normalized_headers.get("x-signature-timestamp")
+        
+        if not sighex or not timestamp:
+            raise MissingSignatureError
+        
+        valid = self._verify_signature(raw_body, sighex, timestamp)
+        if not valid:
+            return InvalidSignatureError   
     
     async def _dispatch_async(self, batch: EventBatch):
         for e in batch.events:
@@ -78,18 +93,3 @@ class Router:
             if event_type in self._handlers:
                 for func in self._handlers[event_type]:
                     await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
-    
-    def _verify_prc_request(self, raw_body: bytes, headers: dict):
-        normalized_headers = {k.lower(): v for k, v in headers.items()}
-        sighex = normalized_headers.get("x-signature-ed25519")
-        timestamp = normalized_headers.get("x-signature-timestamp")
-        
-        if not sighex or not timestamp:
-            raise MissingSignatureError
-        
-        valid = self._verify_signature(raw_body, sighex, timestamp)
-        if not valid:
-            return InvalidSignatureError
-        
-    def _decode_verified_body(self, raw_body: bytes) -> EventBatch:
-        return EventBatch.model_validate(raw_body.decode())
