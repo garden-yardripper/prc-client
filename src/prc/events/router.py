@@ -28,19 +28,19 @@ class Router:
             self.commands.setdefault(ANY_COMMAND, []).append(func)
     
     async def dispatch_async(self, events: list[EventBatch]):
-        for e in chain.from_iterable(batch.events for batch in events):
-            event_type = e.event_type
-            if event_type == "CustomCommand":
-                # run command handlers
-                command_name = e.command.command
-                if command_name in self.commands:
-                    for func in self.commands[command_name]:
-                        await maybe_coro(func)
+        for batch in events:
+            for e in batch.events:
+                event_type = e.event_type
+                if event_type == "CustomCommand":
+                    # run command handlers
+                    command_name = e.command.command
+                    for func in chain(self.commands.get(command_name, []), self.commands.get(ANY_COMMAND, [])):
+                        await maybe_coro(func, e)
             
-            # run other event handlers
-            if event_type in self.handlers:
-                for func in self.handlers[event_type]:
-                    await maybe_coro(func)
+                # run other event handlers
+                if event_type in self.handlers:
+                    for func in self.handlers[event_type]:
+                        await maybe_coro(func, e)
 
     def dispatch(self, events):
         try:
