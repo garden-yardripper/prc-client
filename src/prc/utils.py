@@ -1,6 +1,6 @@
 import asyncio
 import inspect
-from typing import Any, Awaitable, Callable, Coroutine
+from typing import Awaitable, Callable
 
 from .v2.models import Location, MinimalLocation, Player, EmergencyCall
 import math
@@ -77,33 +77,3 @@ async def maybe_coro[T](
         return result
     
     raise TypeError("maybe_coro expects a callable or an awaitable")
-
-def run_coroutine[T](coroutine: Coroutine[Any, Any, T]) -> T | asyncio.Task[T]:
-    """Execute a coroutine by scheduling the coroutine as a task if an event loop is already running, or
-    creating a new event loop and executing the coroutine until completion.
-    
-    This is useful when you need to execute a coroutine from contexts where
-    the event loop state is uncertain (for example, in async and/or sync code paths).
-    
-    Arguments
-    ---------
-    coroutine: `Coroutine`
-        The coroutine object to execute.
-    
-    Returns
-    -------
-    `asyncio.Task` | `Any`
-        The `asyncio.Task` object if a running loop exists (task is scheduled but
-        not awaited here), otherwise the coroutine's result when executed via
-        `asyncio.run`.
-    """
-    
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = None
-    
-    if loop and loop.is_running():
-        return asyncio.create_task(coroutine)
-    else:
-        return asyncio.run(coroutine)
