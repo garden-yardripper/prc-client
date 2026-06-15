@@ -7,7 +7,7 @@ class _On:
     def command(self, command: str):
         """Register a function to be called when a specific command is run in-game."""
         def wrapper(func):
-            self.router.add_function(func, "CustomCommand")
+            self.router.add_command(func, command)
             return func
         return wrapper
     
