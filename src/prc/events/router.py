@@ -75,7 +75,7 @@ class Router:
         
         valid = self._verify_signature(raw_body, sighex, timestamp)
         if not valid:
-            return InvalidSignatureError   
+            raise InvalidSignatureError   
     
     async def _dispatch_async(self, batch: EventBatch):
         for e in batch.events:
