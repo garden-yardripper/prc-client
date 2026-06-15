@@ -9,28 +9,28 @@ class _On:
     def command(self, command: str):
         """Register a function to be called when a specific command is run in-game."""
         def wrapper(func):
-            self.router.add_command(func, command)
+            self.router._add_command(func, command)
             return func
         return wrapper
     
     def any_custom_command(self):
         """Register a function to be called when any custom command is run in-game."""
         def wrapper(func):
-            self.router.add_command(func, None)
+            self.router._add_command(func, None)
             return func
         return wrapper
     
     def custom_event(self, event_name: str):
         """Register a function to be called when a custom event with the specified name is received."""
         def wrapper(func):
-            self.router.add_function(func, event_name)
+            self.router._add_function(func, event_name)
             return func
         return wrapper
     
     def emergency_start(self):
         """Register a function to be called when an emergency call is made in-game."""
         def wrapper(func):
-            self.router.add_function(func, "EmergencyCallStarted")
+            self.router._add_function(func, "EmergencyCallStarted")
             return func
         return wrapper
     
@@ -40,6 +40,6 @@ class _On:
         These are occasionally sent by the API to test the validity of the webhook URL and its signature verification.
         """
         def wrapper(func):
-            self.router.add_function(func, "WebhookProbe")
+            self.router._add_function(func, "WebhookProbe")
             return func
         return wrapper
