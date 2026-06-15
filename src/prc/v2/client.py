@@ -1,10 +1,26 @@
 from httpx import Response
-from .models import Server, BundledServer
+
+from ..users import FullUser, IdUser, UsernameUser
+from .models import Player, Server, BundledServer
 from .server import _GetServer
-from ..command import CommandLike
+from ..command import AnyUserType, CommandLike
 from .send_command import _SendCommand
 
 type ClientType = AsyncClient | Client
+
+def _get_player_in_server_from_user(server: Server, user: AnyUserType) -> Player:
+    if isinstance(user, (FullUser, IdUser)):
+        user_search = user.id
+    elif isinstance(user, UsernameUser):
+        user_search = user.name
+    else:
+        user_search = user
+        
+    for player in server.players:
+        if player.user.id == user_search or player.user.name == user_search:
+            return player
+    
+    raise ValueError("User not found in server")
 
 class AsyncClient(_GetServer, _SendCommand):
     """Asynchronous client for the ER:LC private server API."""
@@ -54,6 +70,35 @@ class AsyncClient(_GetServer, _SendCommand):
         if self.policy:
             self.policy.preview_command(command, raise_for_status=True)
         return await self._send_command_async(command)
+    
+    async def get_player_from_user(self, user: AnyUserType, server: Server | None = None) -> Player:
+        """Utility function to get an in-game `Player` from a `User` type.
+        
+        This is useful to access player data when you only have a `User` object.
+
+        Parameters
+        ----------
+        user: `AnyUserType`
+            The user to get the player from.
+        server: `Server` | `None` (optional)
+            An optional server to search for the player in.
+            If you already have a `Server` object, you can pass it here to save an additional API call.
+        
+        Raises
+        ------
+        `ValueError`
+            If the user is not in-game.
+
+        Returns
+        -------
+        `Player`
+            The player object for the given user.
+        """
+        if isinstance(user, Player):
+            return user
+        
+        server = server or await self.get_server(players=True)
+        return _get_player_in_server_from_user(server, user)
 
 class Client(_GetServer, _SendCommand):
     """Synchronous client for the ER:LC private server API."""
@@ -103,3 +148,32 @@ class Client(_GetServer, _SendCommand):
         if self.policy:
             self.policy.preview_command(command, raise_for_status=True)
         return self._send_command_sync(command)
+    
+    def get_player_from_user(self, user: AnyUserType, server: Server | None = None) -> Player:
+        """Utility function to get an in-game `Player` from a `User` type.
+        
+        This is useful to access player data when you only have a `User` object.
+
+        Parameters
+        ----------
+        user: `AnyUserType`
+            The user to get the player from.
+        server: `Server` | `None` (optional)
+            An optional server to search for the player in.
+            If you already have a `Server` object, you can pass it here to save an additional API call.
+        
+        Raises
+        ------
+        `ValueError`
+            If the user is not in-game.
+
+        Returns
+        -------
+        `Player`
+            The player object for the given user.
+        """
+        if isinstance(user, Player):
+            return user
+        
+        server = server or self.get_server(players=True)
+        return _get_player_in_server_from_user(server, user)
