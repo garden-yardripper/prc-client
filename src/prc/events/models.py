@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from prc.v2.models import EmergencyCall
+from ..v2.models import EmergencyCall
 
 @dataclass
 class CustomCommand:
