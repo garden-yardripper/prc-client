@@ -35,7 +35,6 @@ class CommandPolicyViolation(PRCError):
     def from_preview(cls, preview: "CommandPreview"):
         # Use the provided preview's Command directly to avoid circular imports.
         return cls(preview.command, preview.reason)
-        
 
 class ApiError(PRCError):
     """Raised when the PRC API returned an error."""

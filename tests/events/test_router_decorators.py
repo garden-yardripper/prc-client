@@ -102,7 +102,7 @@ async def test_router_command_handlers():
     
     emergency = EventBatch.model_validate(emergency_call())
     command = EventBatch.model_validate(custom_command())
-    await router.dispatch_async([emergency, command])
+    await router._dispatch_async([emergency, command])
     
     assert emergency_start_called is True
     assert logging_command_called is True
