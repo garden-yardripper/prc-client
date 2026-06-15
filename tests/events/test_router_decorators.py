@@ -51,6 +51,46 @@ def custom_command():
         }],
         "server": "gbzaDhOJQTPrFVIjmNuyTYqzyqupLolnWfJmPznx"
     }
+    
+def all_events():
+    return {
+        "events": [
+            {
+                "data": {
+                    "players": [],
+                    "caller": 913430532,
+                    "description": "hekp me",
+                    "callNumber": 136,
+                    "team": "Fire",
+                    "position": [
+                        2358.7,
+                        1180.1
+                    ],
+                    "positionDescriptor": "rta",
+                    "startedAt": 1775442933
+                },
+                "timestamp": 1775442933,
+                "event": "EmergencyCallStarted",
+                "origin": "server"
+            },
+            {
+                "event": "WebhookProbe",
+                "timestamp": 1775444267,
+                "origin": "global",
+                "data": {}
+            },
+            {
+                "data": {
+                    "command": "logging",
+                    "argument": "This is a custom command."
+                },
+                "timestamp": 1775518795,
+                "event": "CustomCommand",
+                "origin": "913430532"
+            }
+        ],
+        "server": "gbzaDhOJQTPrFVIjmNuyTYqzyqupLolnWfJmPznx"
+    }
 
 def test_event_validation():
     emergency = EventBatch.model_validate(emergency_call())
@@ -100,9 +140,8 @@ async def test_router_command_handlers():
         assert e.event_type == "CustomCommand"
         any_cmd_called = True
     
-    emergency = EventBatch.model_validate(emergency_call())
-    command = EventBatch.model_validate(custom_command())
-    await router._dispatch_async([emergency, command])
+    emergency = EventBatch.model_validate(all_events())
+    await router._dispatch_async(emergency)
     
     assert emergency_start_called is True
     assert logging_command_called is True
