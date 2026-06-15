@@ -62,25 +62,24 @@ class Router:
         else:
             self._commands.setdefault(ANY_COMMAND, []).append(func)
     
-    async def _dispatch_async(self, events: list[EventBatch]):
-        for batch in events:
-            for e in batch.events:
-                event_type = e.event_type
-                if event_type == "CustomCommand":
-                    # run command handlers
-                    command_name = e.command.command
-                    for func in chain(
-                        self._commands.get(command_name, []),
-                        self._commands.get(ANY_COMMAND, [])
-                    ):
-                        await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
-            
-                # run other event handlers
-                if event_type in self._handlers:
-                    for func in self._handlers[event_type]:
-                        await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
+    async def _dispatch_async(self, batch: EventBatch):
+        for e in batch.events:
+            event_type = e.event_type
+            if event_type == "CustomCommand":
+                # run command handlers
+                command_name = e.command.command
+                for func in chain(
+                    self._commands.get(command_name, []),
+                    self._commands.get(ANY_COMMAND, [])
+                ):
+                    await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
+        
+            # run other event handlers
+            if event_type in self._handlers:
+                for func in self._handlers[event_type]:
+                    await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
 
-    def _dispatch(self, events):
+    def _dispatch(self, batch: EventBatch):
         try:
             asyncio.get_running_loop()
         except RuntimeError:
@@ -93,4 +92,4 @@ class Router:
                 "Use await dispatch_async()."
             )
 
-        asyncio.run(self._dispatch_async(events))
+        asyncio.run(self._dispatch_async(batch))
