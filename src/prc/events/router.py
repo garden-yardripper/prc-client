@@ -24,7 +24,8 @@ class Router:
     def add_command(self, func: Callable, name: str | None):
         if name:
             self.commands.setdefault(name, []).append(func)
-        self.commands.setdefault(ANY_COMMAND, []).append(func)
+        else:
+            self.commands.setdefault(ANY_COMMAND, []).append(func)
     
     async def dispatch_async(self, events: list[EventBatch]):
         for e in chain.from_iterable(batch.events for batch in events):
