@@ -79,15 +79,17 @@ async def test_router_command_handlers():
     
     @router.on.emergency_start()
     def emergency_start(e: Event):
-        print(e.event_type)
+        assert isinstance(e, Event)
+        assert e.event_type == "EmergencyCallStarted"
     
     @router.on.command("logging")
     async def logging_command(e: Event):
-        print(e.event_type)
+        assert isinstance(e, Event)
+        assert e.event_type == "CustomCommand"
     
     @router.on.any_custom_command()
     def any_cmd(e: Event):
-        print("Any command handler ran")
+        assert e.event_type == "CustomCommand"
     
     emergency = EventBatch.model_validate(emergency_call())
     command = EventBatch.model_validate(custom_command())
