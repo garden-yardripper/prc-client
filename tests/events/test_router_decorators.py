@@ -1,6 +1,7 @@
 import pytest
 
 from prc.events.models import CustomCommand, EventBatch, Event
+from prc.events.router import Router
 from prc.v2.models import EmergencyCall
 
 def emergency_call():
@@ -72,3 +73,23 @@ def test_event_validation():
     
     with pytest.raises(ValueError):
         command.events[0].emergency_call
+        
+async def test_router_command_handlers():
+    router = Router()
+    
+    @router.on.emergency_start()
+    def emergency_start(e: Event):
+        print(e.event_type)
+    
+    @router.on.command("logging")
+    async def logging_command(e: Event):
+        print(e.event_type)
+    
+    @router.on.any_custom_command()
+    def any_cmd(e: Event):
+        print("Any command handler ran")
+    
+    emergency = EventBatch.model_validate(emergency_call())
+    command = EventBatch.model_validate(custom_command())
+    
+    await router.dispatch_async([emergency, command])
