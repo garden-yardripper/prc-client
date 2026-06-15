@@ -10,6 +10,15 @@ logger = logging.getLogger(__name__)
 class PRCError(Exception):
     """Base class for all PRC API errors."""
 
+class WebhookError(PRCError):
+    """Base class for all event webhook errors."""
+    
+class MissingSignatureError(WebhookError):
+    """Required data for signature verification is missing."""
+    
+class InvalidSignatureError(WebhookError):
+    """The request's signature is invalid."""
+
 class DeserializationError(PRCError):
     """Raised when PRC API JSON data was unable to be deserialized into a Python object."""
 

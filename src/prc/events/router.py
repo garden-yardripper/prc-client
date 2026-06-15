@@ -8,6 +8,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
+from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
 from .decorators import _On
 from .models import EventBatch
@@ -100,12 +101,11 @@ class Router:
         timestamp = normalized_headers.get("x-signature-timestamp")
         
         if not sighex or not timestamp:
-            return 400
+            raise MissingSignatureError
         
         valid = self._verify_signature(raw_body, sighex, timestamp)
         if not valid:
-            return 400
-        return 200
+            return InvalidSignatureError
     
     async def dispatch_async(self, raw_body: bytes):
         batch = EventBatch.model_validate(raw_body.decode())
