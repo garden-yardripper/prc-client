@@ -1,7 +1,9 @@
-from .router import Router
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .router import Router
 
 class _On:
-    def __init__(self, router: Router) -> None:
+    def __init__(self, router: "Router") -> None:
         self.router = router
         
     def command(self, command: str):
