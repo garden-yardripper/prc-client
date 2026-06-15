@@ -1,5 +1,6 @@
 import asyncio
-from typing import Any, Coroutine
+import inspect
+from typing import Any, Awaitable, Callable, Coroutine
 
 from .v2.models import Location, MinimalLocation, Player, EmergencyCall
 import math
@@ -39,6 +40,44 @@ def get_distance_between_locations(
     
     return math.dist(position1, position2)
 
+async def maybe_coro[T](
+    func: Callable[..., T] | Awaitable[T] | Callable[..., Awaitable[T]],
+    *args,
+    **kwargs,
+) -> T:
+    """A utility to call `func` with the given arguments and await the result if needed,
+    await `func` itself if it is a coroutine, or run the function in a separate thread if it is not a coroutine.
+    
+    This is useful for calling functions that may or may not be coroutines.
+    
+    Arguments
+    ---------
+    func: `Callable` | `Awaitable`
+        The function to call.
+    *args
+        Positional arguments to pass to `func`.
+    **kwargs
+        Keyword arguments passed to `func`.
+        
+    Returns
+    -------
+    `Any`
+        The result of `func`, awaited if it is awaitable.
+    """
+    if inspect.isawaitable(func):
+        return await func
+    
+    if inspect.iscoroutinefunction(func):
+        return await func(*args, **kwargs)
+    
+    if callable(func):
+        result = await asyncio.to_thread(func, *args, **kwargs)
+        if inspect.isawaitable(result):
+            return await result
+        return result
+    
+    raise TypeError("maybe_coro expects a callable or an awaitable")
+
 def run_coroutine[T](coroutine: Coroutine[Any, Any, T]) -> T | asyncio.Task[T]:
     """Execute a coroutine by scheduling the coroutine as a task if an event loop is already running, or
     creating a new event loop and executing the coroutine until completion.
@@ -63,7 +102,7 @@ def run_coroutine[T](coroutine: Coroutine[Any, Any, T]) -> T | asyncio.Task[T]:
         loop = asyncio.get_running_loop()
     except RuntimeError:
         loop = None
-
+    
     if loop and loop.is_running():
         return asyncio.create_task(coroutine)
     else:
