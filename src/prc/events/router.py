@@ -95,7 +95,7 @@ class Router:
 
         asyncio.run(self._dispatch_async(batch))
     
-    def validate_prc_request(self, raw_body: bytes, headers: dict):
+    def _verify_prc_request(self, raw_body: bytes, headers: dict):
         normalized_headers = {k.lower(): v for k, v in headers.items()}
         sighex = normalized_headers.get("x-signature-ed25519")
         timestamp = normalized_headers.get("x-signature-timestamp")
@@ -106,11 +106,6 @@ class Router:
         valid = self._verify_signature(raw_body, sighex, timestamp)
         if not valid:
             return InvalidSignatureError
-    
-    async def dispatch_async(self, raw_body: bytes):
-        batch = EventBatch.model_validate(raw_body.decode())
-        await self._dispatch_async(batch)
         
-    def dispatch(self, raw_body: bytes):
-        batch = EventBatch.model_validate(raw_body.decode())
-        self._dispatch(batch)
+    def _decode_verified_body(self, raw_body: bytes) -> EventBatch:
+        return EventBatch.model_validate(raw_body.decode())
