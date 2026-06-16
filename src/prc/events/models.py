@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
 from ..users import IdUser
 from ..v2.models import EmergencyCall
+from ..v2.client import ClientType, Client, AsyncClient
+from ..command import cmd
 
 @dataclass
 class CustomCommand:
@@ -47,6 +49,30 @@ class Context[T: ClientType](BaseModel):
     # private attributes that will be added immediately after initialization
     client: Annotated[T, PrivateAttr()]
     b64_server: Annotated[str, PrivateAttr()]
+    
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    def reply(self, message: str) -> None:
+        """Reply to this event with a message. Only valid for custom command events."""
+        
+        if self.event_type != "CustomCommand":
+            raise ValueError("Can only reply to custom command events.")
+        if not isinstance(self.client, Client):
+            raise TypeError("Client type does not support sending messages.")
+        
+        player = self.client.get_player_from_user(int(self.origin))
+        self.client.send_command(cmd.pm(player, message))
+    
+    async def areply(self, message: str) -> None:
+        """Reply to this event with a message. Only valid for custom command events."""
+        
+        if self.event_type != "CustomCommand":
+            raise ValueError("Can only reply to custom command events.")
+        if not isinstance(self.client, AsyncClient):
+            raise TypeError("Client type does not support sending messages.")
+        
+        player = await self.client.get_player_from_user(int(self.origin))
+        await self.client.send_command(cmd.pm(player, message))
     
     @field_validator("timestamp", mode="before")
     def timestamp_to_datetime(cls, v):
