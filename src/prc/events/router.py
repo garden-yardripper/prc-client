@@ -73,8 +73,8 @@ class Router:
     def _decode_verified_body(self, raw_body: bytes) -> EventBatch:
         batch = EventBatch.model_validate_json(raw_body)
         for event in batch.events:
-            event.client = self.client
-            event.b64_server = batch.server
+            event._client = self.client
+            event._b64_server = batch.server
         return batch
     
     def _verify_signature(self, raw_body: bytes, sighex: str, timestamp: str) -> bool:

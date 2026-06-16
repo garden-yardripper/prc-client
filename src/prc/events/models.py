@@ -47,13 +47,16 @@ class Context[T: ClientType](BaseModel):
     origin: str
     
     # private attributes that will be added immediately after initialization
-    client: Annotated[T, PrivateAttr()]
-    b64_server: Annotated[str, PrivateAttr()]
+    _client: T = PrivateAttr()
+    _b64_server: str = PrivateAttr()
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     def reply(self, message: str) -> None:
-        """Reply to this event with a message. Only valid for custom command events."""
+        """Reply to this event with a message. Only valid for custom command events.
+        
+        Handler function must match the client type (`async def` for `AsyncClient`, `def` for `Client`)
+        to use this method."""
         
         if self.event_type != "CustomCommand":
             raise ValueError("Can only reply to custom command events.")
@@ -64,7 +67,10 @@ class Context[T: ClientType](BaseModel):
         self.client.send_command(cmd.pm(player, message))
     
     async def areply(self, message: str) -> None:
-        """Reply to this event with a message. Only valid for custom command events."""
+        """Reply to this event with a message. Only valid for custom command events.
+        
+        Handler function must match the client type (`async def` for `AsyncClient`, `def` for `Client`)
+        to use this method."""
         
         if self.event_type != "CustomCommand":
             raise ValueError("Can only reply to custom command events.")
@@ -79,6 +85,16 @@ class Context[T: ClientType](BaseModel):
         if isinstance(v, int):
             return datetime.datetime.fromtimestamp(v)
         return v
+    
+    @property
+    def client(self) -> T:
+        """`ClientType`: The client instance associated with this event's router."""
+        return self._client
+    
+    @property
+    def b64_server(self) -> str:
+        """`str`: The mysterious Base64 server associated with this event."""
+        return self._b64_server
     
     @property
     def emergency_call(self) -> EmergencyCall:
