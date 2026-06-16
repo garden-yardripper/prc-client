@@ -1,7 +1,9 @@
+import json
 import pytest
 
-from prc.events.models import CustomCommand, EventBatch, Event
+from prc.events.models import CustomCommand, EventBatch, Context
 from prc.events.router import Router
+from prc.v2.client import AsyncClient
 from prc.v2.models import EmergencyCall
 
 def emergency_call():
@@ -93,17 +95,18 @@ def all_events():
     }
 
 def test_event_validation():
-    emergency = EventBatch.model_validate(emergency_call())
-    probe = EventBatch.model_validate(webhook_probe())
-    command = EventBatch.model_validate(custom_command())
+    router = Router(AsyncClient("server-key"))
+    emergency = router._decode_verified_body(json.dumps(emergency_call()).encode())
+    probe = router._decode_verified_body(json.dumps(webhook_probe()).encode())
+    command = router._decode_verified_body(json.dumps(custom_command()).encode())
     
     assert isinstance(emergency, EventBatch)
     assert isinstance(probe, EventBatch)
     assert isinstance(command, EventBatch)
     
-    assert isinstance(emergency.events[0], Event)
-    assert isinstance(probe.events[0], Event)
-    assert isinstance(command.events[0], Event)
+    assert isinstance(emergency.events[0], Context)
+    assert isinstance(probe.events[0], Context)
+    assert isinstance(command.events[0], Context)
     
     assert isinstance(emergency.events[0].emergency_call, EmergencyCall)
     assert isinstance(command.events[0].command, CustomCommand)
@@ -115,27 +118,27 @@ def test_event_validation():
         command.events[0].emergency_call
         
 async def test_router_command_handlers():
-    router = Router(sync_handlers_to_thread=False)
+    router = Router(AsyncClient("server-key"), sync_handlers_to_thread=False)
     emergency_start_called = False
     logging_command_called = False
     any_cmd_called = False
     
     @router.on.emergency_start()
-    def emergency_start(e: Event):
+    def emergency_start(e: Context):
         nonlocal emergency_start_called
-        assert isinstance(e, Event)
+        assert isinstance(e, Context)
         assert e.event_type == "EmergencyCallStarted"
         emergency_start_called = True
     
     @router.on.command("logging")
-    async def logging_command(e: Event):
+    async def logging_command(e: Context):
         nonlocal logging_command_called
-        assert isinstance(e, Event)
+        assert isinstance(e, Context)
         assert e.event_type == "CustomCommand"
         logging_command_called = True
     
     @router.on.any_custom_command()
-    def any_cmd(e: Event):
+    def any_cmd(e: Context):
         nonlocal any_cmd_called
         assert e.event_type == "CustomCommand"
         any_cmd_called = True
