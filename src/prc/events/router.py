@@ -93,3 +93,19 @@ class Router:
             if event_type in self._handlers:
                 for func in self._handlers[event_type]:
                     await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
+                    
+    async def prepare_request(self, raw_body: bytes, headers: dict) -> tuple[Literal[200, 400], Callable | None]:
+        try:
+            self._verify_prc_request(raw_body, headers)
+            status = 200
+        except (MissingSignatureError, InvalidSignatureError):
+            status = 400
+        
+        if status == 400:
+            return 400, None
+        
+        batch = self._decode_verified_body(raw_body)
+        async def dispatch():
+            await self._dispatch_async(batch)
+            
+        return 200, dispatch
