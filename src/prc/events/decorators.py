@@ -45,7 +45,7 @@ class _On:
         return wrapper
     
     def any_event(self):
-        """Register a function to be called when any event is received."""
+        """Register a function to be called when any non-command event is received."""
         def wrapper(func):
             self.router._add_function(func, None)
             return func

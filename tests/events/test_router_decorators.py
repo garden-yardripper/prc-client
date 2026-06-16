@@ -117,35 +117,43 @@ def test_event_validation():
     with pytest.raises(ValueError):
         command.events[0].emergency_call
         
-async def test_router_command_handlers():
+async def test_router_event_dispatch():
     router = Router(AsyncClient("server-key"), sync_handlers_to_thread=False)
-    emergency_start_called = False
-    logging_command_called = False
-    any_cmd_called = False
+    # ensure each decorated function is called exactly once
+    emergency_start_called = 0
+    logging_command_called = 0
+    any_cmd_called = 0
+    any_event_called = 0
     
     @router.on.emergency_start()
     def emergency_start(e: Context):
         nonlocal emergency_start_called
         assert isinstance(e, Context)
         assert e.event_type == "EmergencyCallStarted"
-        emergency_start_called = True
+        emergency_start_called += 1
     
     @router.on.command("logging")
     async def logging_command(e: Context):
         nonlocal logging_command_called
         assert isinstance(e, Context)
         assert e.event_type == "CustomCommand"
-        logging_command_called = True
+        logging_command_called += 1
     
     @router.on.any_custom_command()
     def any_cmd(e: Context):
         nonlocal any_cmd_called
         assert e.event_type == "CustomCommand"
-        any_cmd_called = True
-    
+        any_cmd_called += 1
+        
+    @router.on.any_event()
+    async def any_event(e: Context):
+        nonlocal any_event_called
+        any_event_called += 1
+
     emergency = EventBatch.model_validate(all_events())
     await router._dispatch_async(emergency)
     
-    assert emergency_start_called is True
-    assert logging_command_called is True
-    assert any_cmd_called is True
+    assert emergency_start_called == 1
+    assert logging_command_called == 1
+    assert any_cmd_called == 1
+    assert any_event_called == 1
