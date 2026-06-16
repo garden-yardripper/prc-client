@@ -29,4 +29,4 @@ jobs:
           python -m uv sync --extra events --group dev
 
       - name: Run tests
-        run: python -m pytest
+        run: python -m uv run pytest
