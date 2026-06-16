@@ -140,10 +140,9 @@ class Router:
             ]
             results = await asyncio.gather(*coros, return_exceptions=True)
             
-            # raise any exceptions that occured in handlers
-            for res in results:
-                if isinstance(res, Exception):
-                    raise res
+            excs = [res for res in results if isinstance(res, Exception)]
+            if excs:
+                raise ExceptionGroup("One or more command/event handlers raised exceptions.", excs)
                     
     async def prepare_request(self, raw_body: bytes, headers: dict) -> tuple[Literal[200, 400], Callable | None]:
         try:
