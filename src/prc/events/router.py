@@ -29,12 +29,15 @@ ANY_COMMAND = object()
 
 class Router:
     def __init__(self, client: ClientType, *, sync_handlers_to_thread: bool = True) -> None:
-        """Initialize a new `Router` instance.
+        """Initialize a new `Router` instance to handle event routing and request verification.
         
         Use the `router.on` decorators to register event handlers.
         
         Arguments
         ----------
+        client: `ClientType`
+            The client instance to associate with this router.
+            This client will be accessible in event contexts.
         sync_handlers_to_thread: `bool` (optional)
             Whether to run synchronous handlers in a separate thread.
             Setting to `False` will cause synchronous handlers to block the event loop.
