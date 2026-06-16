@@ -1,5 +1,5 @@
 import prc
-from prc.command import cmd
+from prc import cmd
 from prc.policy import CommandPolicy
 
 # Only allow hint and message commands

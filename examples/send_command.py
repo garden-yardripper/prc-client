@@ -1,5 +1,5 @@
 import prc
-from prc.command import cmd
+from prc import cmd
 
 with prc.v2.Client(server_key="...") as client:
     server = client.get_server(players=True)
