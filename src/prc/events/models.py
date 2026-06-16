@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
 from ..users import IdUser
 from ..v2.models import EmergencyCall
@@ -21,16 +21,16 @@ class CustomCommand:
     command: str
     argument: str
 
-class Event(BaseModel):
-    """Represents an in-game event.
+class Context[T: ClientType](BaseModel):
+    """Represents the context of an in-game event.
     
-    Use the `emergency_call` and `command` properties to obtain specific data on the event.
+    Use the `emergency_call` and `command` properties to obtain specific context data.
     Ensure to check the `event_type` before doing so to prevent accessing invalid data.
     
     Attributes
     ----------
-    timestamp: `int`
-        The event's timestamp as a unix timestamp.
+    timestamp: `datetime.datetime`
+        The event's timestamp as a datetime.
     origin: `str`
         The origin of the event. In the case of custom commands, this will be the command user's ID as a string.
     event_type: `Literal["EmergencyCallStarted", "WebhookProbe", "CustomCommand"]`
@@ -83,14 +83,14 @@ class Event(BaseModel):
         return IdUser(id=int(self.origin))
 
 class EventBatch(BaseModel):
-    """Represents a batch of events sent by the webhook.
+    """Internal class representing a batch of events sent by the webhook.
     
     Attributes
     ----------
-    events: `list[Event]`
-        The list of events in the batch.
+    contexts: `list[Context]`
+        The list of event contexts in the batch.
     server: `str`
         The server to which the events belong (Base64 string).
     """
-    events: list[Event]
+    events: list[Context]
     server: str
