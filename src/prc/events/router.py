@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from starlette.background import BackgroundTask as StarletteBackgroundTask
 
 ANY_COMMAND = object()
+ANY_EVENT = object()
 
 class Router:
     def __init__(self, client: ClientType, *, sync_handlers_to_thread: bool = True) -> None:
@@ -48,7 +49,7 @@ class Router:
         
         self.client = client
         self.sync_handlers_to_thread = sync_handlers_to_thread
-        self._handlers: dict[str, list[Callable]] = {}
+        self._handlers: dict[str | object, list[Callable]] = {}
         self._commands: dict[str | object, list[Callable]] = {}
         
         _raw_public_key = "MCowBQYDK2VwAyEAjSICb9pp0kHizGQtdG8ySWsDChfGqi+gyFCttigBNOA="
@@ -63,9 +64,12 @@ class Router:
     
     def _add_function(self,
         func: Callable,
-        event_type: Literal["EmergencyCallStarted", "WebhookProbe"] | str
+        event_type: Literal["EmergencyCallStarted", "WebhookProbe"] | str | None
     ):
-        self._handlers.setdefault(event_type, []).append(func)
+        if event_type:
+            self._handlers.setdefault(event_type, []).append(func)
+        else:
+            self._handlers.setdefault(ANY_EVENT, []).append(func)
         
     def _add_command(self, func: Callable, name: str | None):
         if name:
@@ -119,7 +123,10 @@ class Router:
         
             # run other event handlers
             if event_type in self._handlers:
-                for func in self._handlers[event_type]:
+                for func in chain(
+                    self._handlers.get(event_type, []),
+                    self._handlers.get(ANY_EVENT, [])
+                ):
                     await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
                     
     async def prepare_request(self, raw_body: bytes, headers: dict) -> tuple[Literal[200, 400], Callable | None]:

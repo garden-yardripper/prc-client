@@ -43,3 +43,10 @@ class _On:
             self.router._add_function(func, "WebhookProbe")
             return func
         return wrapper
+    
+    def any_event(self):
+        """Register a function to be called when any event is received."""
+        def wrapper(func):
+            self.router._add_function(func, None)
+            return func
+        return wrapper
