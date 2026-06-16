@@ -3,9 +3,15 @@ import binascii
 from itertools import chain
 from typing import Callable, Literal
 
-from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+try:
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+except ImportError:
+    raise RuntimeError((
+        "PRC event webhook support requires the `cryptography` library. "
+        "Install the dependency with `pip install prc-client[events]`."
+    ))
 
 from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
