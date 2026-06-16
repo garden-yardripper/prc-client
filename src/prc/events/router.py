@@ -17,9 +17,7 @@ from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
 from .decorators import _On
 from .models import EventBatch
-from .integrations.fastapi import _FastApiIntegration
-from .integrations.quart import _QuartIntegration
-from .integrations.starlette import _StarletteIntegration
+from .integrations import _FastApiIntegration, _QuartIntegration, _StarletteIntegration
 
 if TYPE_CHECKING:
     from fastapi import Request as FastRequest, BackgroundTasks as FastBackgroundTasks
