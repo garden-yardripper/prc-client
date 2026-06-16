@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import binascii
 from itertools import chain
@@ -112,22 +113,37 @@ class Router:
     async def _dispatch_async(self, batch: EventBatch):
         for e in batch.events:
             event_type = e.event_type
-            if event_type == "CustomCommand":
-                # run command handlers
-                command_name = e.command.command
-                for func in chain(
-                    self._commands.get(command_name, []),
+            
+            command_funcs = []
+            if e.event_type == "CustomCommand":
+                # collect command handlers
+                command_funcs = list(chain(
+                    self._commands.get(e.command.command, []),
                     self._commands.get(ANY_COMMAND, [])
-                ):
-                    await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
-        
-            # run other event handlers
+                ))
+            
+            # collect other event handlers
+            handler_funcs = []
             if event_type in self._handlers:
-                for func in chain(
+                handler_funcs = list(chain(
                     self._handlers.get(event_type, []),
                     self._handlers.get(ANY_EVENT, [])
-                ):
-                    await maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
+                ))
+            
+            funcs = command_funcs + handler_funcs
+            if not funcs:
+                continue
+            
+            coros = [
+                maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
+                for func in funcs
+            ]
+            results = await asyncio.gather(*coros, return_exceptions=True)
+            
+            # raise any exceptions that occured in handlers
+            for res in results:
+                if isinstance(res, Exception):
+                    raise res
                     
     async def prepare_request(self, raw_body: bytes, headers: dict) -> tuple[Literal[200, 400], Callable | None]:
         try:
