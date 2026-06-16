@@ -19,10 +19,13 @@ from .decorators import _On
 from .models import EventBatch
 from .integrations.fastapi import _FastApiIntegration
 from .integrations.quart import _QuartIntegration
+from .integrations.starlette import _StarletteIntegration
 
 if TYPE_CHECKING:
     from fastapi import Request as FastRequest, BackgroundTasks as FastBackgroundTasks
     from quart import Quart
+    from starlette.requests import Request as StarletteRequest
+    from starlette.background import BackgroundTask as StarletteBackgroundTask
 
 ANY_COMMAND = object()
 
@@ -51,6 +54,7 @@ class Router:
         
         self._fastapi = _FastApiIntegration(self)
         self._quart = _QuartIntegration(self)
+        self._starlette = _StarletteIntegration(self)
     
     def _add_function(self,
         func: Callable,
@@ -133,3 +137,8 @@ class Router:
     
     async def handle_quart_request(self, app: Quart) -> Literal[200, 400]:
         return await self._quart.handle_quart_request(app)
+    
+    async def handle_starlette_request(
+        self, request: StarletteRequest
+    ) -> tuple[Literal[200, 400], StarletteBackgroundTask | None]:
+        return await self._starlette.handle_starlette_request(request)
