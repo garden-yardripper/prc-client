@@ -1,7 +1,7 @@
 import base64
 import binascii
 from itertools import chain
-from typing import Callable, Literal
+from typing import Callable, Literal, TYPE_CHECKING
 
 try:
     from cryptography.exceptions import InvalidSignature
@@ -17,6 +17,10 @@ from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
 from .decorators import _On
 from .models import EventBatch
+from .integrations.fastapi import _FastApiIntegration
+
+if TYPE_CHECKING:
+    from fastapi import Request, BackgroundTasks
 
 ANY_COMMAND = object()
 
@@ -42,6 +46,8 @@ class Router:
         self._public_key = serialization.load_der_public_key(_public_key_bytes)
         
         self.on = _On(self)
+        
+        self._fastapi = _FastApiIntegration(self)
     
     def _add_function(self,
         func: Callable,
@@ -115,3 +121,9 @@ class Router:
             await self._dispatch_async(batch)
             
         return 200, dispatch
+    
+    async def handle_fastapi_request(self,
+        request: "Request",
+        background_tasks: "BackgroundTasks"
+    ) -> Literal[200, 400]:
+        return await self._fastapi.handle_fastapi_request(request, background_tasks)
