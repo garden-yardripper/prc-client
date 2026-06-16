@@ -17,7 +17,6 @@ from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
 from .decorators import _On
 from .models import EventBatch
-from .integrations import _FastApiIntegration, _QuartIntegration, _StarletteIntegration
 
 if TYPE_CHECKING:
     from fastapi import Request as FastRequest, BackgroundTasks as FastBackgroundTasks
@@ -40,6 +39,9 @@ class Router:
             Setting to `False` will cause synchronous handlers to block the event loop.
             Defaults to `True`.
         """
+        # prevent circular import
+        from .integrations import _FastApiIntegration, _QuartIntegration, _StarletteIntegration
+        
         self.sync_handlers_to_thread = sync_handlers_to_thread
         self._handlers: dict[str, list[Callable]] = {}
         self._commands: dict[str | object, list[Callable]] = {}
@@ -133,10 +135,10 @@ class Router:
     ) -> Literal[200, 400]:
         return await self._fastapi.handle_fastapi_request(request, background_tasks)
     
-    async def handle_quart_request(self, app: Quart) -> Literal[200, 400]:
+    async def handle_quart_request(self, app: "Quart") -> Literal[200, 400]:
         return await self._quart.handle_quart_request(app)
     
     async def handle_starlette_request(
-        self, request: StarletteRequest
-    ) -> tuple[Literal[200, 400], StarletteBackgroundTask | None]:
+        self, request: "StarletteRequest"
+    ) -> tuple[Literal[200, 400], "StarletteBackgroundTask | None"]:
         return await self._starlette.handle_starlette_request(request)
