@@ -3,7 +3,7 @@ from prc.command import Command
 from prc.exceptions import CommandPolicyViolation
 from prc.policy import CommandPolicy
 from prc.v2.client import AsyncClient, Client
-from prc.v2 import cmd
+from prc import cmd
 
 def test_policy_params():
     policy = CommandPolicy(
