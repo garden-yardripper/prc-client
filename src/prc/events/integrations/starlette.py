@@ -1,7 +1,14 @@
 from typing import Literal
-from starlette.requests import Request
-from starlette.background import BackgroundTask
 from ..router import Router
+
+try:
+    from starlette.requests import Request
+    from starlette.background import BackgroundTask
+except ImportError:
+    raise RuntimeError((
+        "Starlette integration for PRC events requires the `starlette` library. "
+        "Install the dependency with `pip install prc-client[starlette]`."
+    ))
 
 class _StarletteIntegration:
     def __init__(self, router: Router) -> None:

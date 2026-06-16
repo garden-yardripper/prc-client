@@ -1,6 +1,13 @@
 from typing import Literal
-from fastapi import Request, BackgroundTasks
 from ..router import Router
+
+try:
+    from fastapi import Request, BackgroundTasks
+except ImportError:
+    raise RuntimeError((
+        "FastAPI integration for PRC events requires the `fastapi` library. "
+        "Install the dependency with `pip install prc-client[fastapi]`."
+    ))
 
 class _FastApiIntegration:
     def __init__(self, router: Router) -> None:

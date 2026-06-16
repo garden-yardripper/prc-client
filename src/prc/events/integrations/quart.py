@@ -1,6 +1,13 @@
 from typing import Literal
-from quart import Quart, request
 from ..router import Router
+
+try:
+    from quart import Quart, request
+except ImportError:
+    raise RuntimeError((
+        "Quart integration for PRC events requires the `quart` library. "
+        "Install the dependency with `pip install prc-client[quart]`."
+    ))
 
 class _QuartIntegration:
     def __init__(self, router: Router) -> None:
