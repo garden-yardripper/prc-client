@@ -20,6 +20,6 @@ class _QuartIntegration:
         
         status, task = await self.router.prepare_request(raw_body, headers)
         if status == 200 and task:
-            app.add_background_task(task())
+            app.add_background_task(task)
         
         return status

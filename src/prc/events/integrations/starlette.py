@@ -22,7 +22,7 @@ class _StarletteIntegration:
 
         status, task = await self.router.prepare_request(raw_body, headers)
         if status == 200 and task:
-            background_task = BackgroundTask(task())
+            background_task = BackgroundTask(task)
         else:
             background_task = None
 

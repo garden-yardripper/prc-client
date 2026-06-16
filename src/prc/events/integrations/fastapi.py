@@ -19,6 +19,6 @@ class _FastApiIntegration:
 
         status, task = await self.router.prepare_request(raw_body, headers)
         if status == 200 and task:
-            background_tasks.add_task(task())
+            background_tasks.add_task(task)
 
         return status
