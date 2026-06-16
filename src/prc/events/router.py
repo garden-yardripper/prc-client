@@ -18,9 +18,11 @@ from ..utils import maybe_coro
 from .decorators import _On
 from .models import EventBatch
 from .integrations.fastapi import _FastApiIntegration
+from .integrations.quart import _QuartIntegration
 
 if TYPE_CHECKING:
-    from fastapi import Request, BackgroundTasks
+    from fastapi import Request as FastRequest, BackgroundTasks as FastBackgroundTasks
+    from quart import Quart
 
 ANY_COMMAND = object()
 
@@ -48,6 +50,7 @@ class Router:
         self.on = _On(self)
         
         self._fastapi = _FastApiIntegration(self)
+        self._quart = _QuartIntegration(self)
     
     def _add_function(self,
         func: Callable,
@@ -123,7 +126,10 @@ class Router:
         return 200, dispatch
     
     async def handle_fastapi_request(self,
-        request: "Request",
-        background_tasks: "BackgroundTasks"
+        request: "FastRequest",
+        background_tasks: "FastBackgroundTasks"
     ) -> Literal[200, 400]:
         return await self._fastapi.handle_fastapi_request(request, background_tasks)
+    
+    async def handle_quart_request(self, app: Quart) -> Literal[200, 400]:
+        return await self._quart.handle_quart_request(app)
