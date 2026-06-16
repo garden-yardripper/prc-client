@@ -47,8 +47,8 @@ class Context[T: ClientType](BaseModel):
     origin: str
     
     # private attributes that will be added immediately after initialization
-    _client: T = PrivateAttr()
-    _b64_server: str = PrivateAttr()
+    _client: Annotated[T, PrivateAttr()]
+    _b64_server: Annotated[str, PrivateAttr()]
     
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
