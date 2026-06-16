@@ -15,6 +15,7 @@ except ImportError:
 
 from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
+from ..v2.client import ClientType
 from .decorators import _On
 from .models import EventBatch
 
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
 ANY_COMMAND = object()
 
 class Router:
-    def __init__(self, sync_handlers_to_thread: bool = True) -> None:
+    def __init__(self, client: ClientType, *, sync_handlers_to_thread: bool = True) -> None:
         """Initialize a new `Router` instance.
         
         Use the `router.on` decorators to register event handlers.
@@ -42,6 +43,7 @@ class Router:
         # prevent circular import
         from .integrations import _FastApiIntegration, _QuartIntegration, _StarletteIntegration
         
+        self.client = client
         self.sync_handlers_to_thread = sync_handlers_to_thread
         self._handlers: dict[str, list[Callable]] = {}
         self._commands: dict[str | object, list[Callable]] = {}
@@ -69,7 +71,11 @@ class Router:
             self._commands.setdefault(ANY_COMMAND, []).append(func)
     
     def _decode_verified_body(self, raw_body: bytes) -> EventBatch:
-        return EventBatch.model_validate(raw_body.decode())
+        batch = EventBatch.model_validate_json(raw_body)
+        for event in batch.events:
+            event.client = self.client
+            event.b64_server = batch.server
+        return batch
     
     def _verify_signature(self, raw_body: bytes, sighex: str, timestamp: str) -> bool:
         if not isinstance(self._public_key, Ed25519PublicKey):

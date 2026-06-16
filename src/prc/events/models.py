@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
 from ..users import IdUser
 from ..v2.models import EmergencyCall
@@ -43,6 +43,10 @@ class Event(BaseModel):
         Field(alias="event")
     ]
     origin: str
+    
+    # private attributes that will be added immediately after initialization
+    client: Annotated[T, PrivateAttr()]
+    b64_server: Annotated[str, PrivateAttr()]
     
     @field_validator("timestamp", mode="before")
     def timestamp_to_datetime(cls, v):
