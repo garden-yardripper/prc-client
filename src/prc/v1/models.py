@@ -154,8 +154,8 @@ class Staff(BaseModel):
         The server administrators.
     mods: `list[FullUser]`
         The server moderators.
-    helpers: `list[FullUser]`
-        The server helpers.
+    co_owners: `list[IdUser]`
+        The server co-owners.
     """
     admins: list[FullUser]
     mods: list[FullUser]
@@ -180,12 +180,8 @@ class Bans(BaseModel):
 
     Attributes
     ----------
-    admins: `list[FullUser]`
-        The server administrators.
-    mods: `list[FullUser]`
-        The server moderators.
-    helpers: `list[FullUser]`
-        The server helpers.
+    users: `list[FullUser]`
+        The banned users.
     """
     users: list[FullUser]
     
@@ -208,12 +204,8 @@ class Player(BaseModel):
         The player's `User` object.
     callsign: `str | None`
         The player's callsign if on a non-civilian team.
-    location: `Location`
-        The player's current location.
     permission: `Literal["Normal", "Server Administrator", "Server Owner", "Server Moderator"]`
         The player's permission level.
-    wanted_stars: `int`
-        The number of wanted stars the player has.
     """
     team: str
     user: Annotated[FullUser, Field(alias="Player")]
@@ -230,6 +222,27 @@ class Player(BaseModel):
         return str(self.user)
 
 class Server(BaseModel):
+    """Represents an ER:LC private server.
+    
+    Attributes
+    ----------
+    name: `str`
+        The name of the server.
+    owner: `IdUser`
+        The owner of the server.
+    co_owners: `list[IdUser]`
+        The co-owners of the server.
+    current_players: `int`
+        The number of players currently on the server.
+    max_players: `int`
+        The maximum number of players that can be on the server.
+    join_key: `str`
+        The server's join key.
+    verification_required: `Literal["Disabled", "Email", "Phone/ID"]`
+        The server's account verification requirement.
+    team_balance: `bool`
+        Whether team balance is enabled on the server.
+    """
     name: str
     owner: Annotated[IdUser, Field(alias="OwnerId")]
     co_owners: Annotated[list[IdUser], Field(alias="CoOwnerIds")]
