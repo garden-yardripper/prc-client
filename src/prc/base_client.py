@@ -82,13 +82,15 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             An existing HTTPX client to use. If not provided, a new one will be created.
         """
         
-        from .v2.client import AsyncClient # prevent circular import
+        # prevent circular import
+        from .v2.client import AsyncClient as V2AsyncClient
+        from .v1.client import AsyncClient as V1AsyncClient
         self.server_key: str = server_key
         self.policy = policy
         self.wait_for_rate_limit = wait_for_rate_limit
         self.connection: HTTPXClient | None = connection
         self.closed: bool = False
-        self.is_async: bool = issubclass(type(self), AsyncClient)
+        self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         
         # rate limit tracking attributes, updated on each request based on response headers
         self.post_expiration: int = int(time.time())
