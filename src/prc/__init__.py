@@ -10,3 +10,6 @@ __all__ = [
     "exceptions", "RateLimitConfig",
     "FullUser", "UsernameUser", "IdUser", "cmd"
 ]
+
+import logging
+logging.getLogger(__name__).addHandler(logging.NullHandler())
