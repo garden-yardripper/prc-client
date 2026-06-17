@@ -1,3 +1,5 @@
+from fastapi import FastAPI, Request, Response, BackgroundTasks
+
 import prc
 from prc import cmd
 from prc.events import Router, Context
@@ -9,7 +11,9 @@ client = prc.v2.AsyncClient(server_key="nJbYdaPQCZhhCSCVRjFO-gbzaDhOJQTPrFVIjmNu
 # which will give better performance.
 router = Router(client, sync_handlers_to_thread=False)
 
-@router.on.command("myid")
+# You can assign multiple commands to the same handler
+# by passing them as additional arguments to the decorator
+@router.on.command("myid", "id", "whoami")
 async def handle_myid_command(ctx: Context):
     # This handler will send the command user a PM when they run the command ';myid' in-game
     await ctx.areply(f"Your user ID is {ctx.user.id}.")
@@ -36,3 +40,14 @@ def log_command_usage(ctx: Context):
     # This handler will log the usage of any custom command to the console
     # Replace with a proper logging statement in a production application
     print(f"User {ctx.user.id} executed command '{ctx.command.command}' with argument '{ctx.command.argument}'.")
+    
+# Basic FastAPI application to receive requests from PRC
+app = FastAPI()
+
+@app.post("/prc/webhook")
+async def prc_webhook(request: Request, background_tasks: BackgroundTasks):
+    # Handle the incoming request using the handle_fastapi_request method,
+    # which will handle all dispatching and background task scheduling for us
+    # and immediately return the appropriate HTTP status code.
+    status = await router.handle_fastapi_request(request, background_tasks)
+    return Response(status_code=status)
