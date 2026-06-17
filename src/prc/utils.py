@@ -1,12 +1,19 @@
 import asyncio
 import inspect
 import logging
+import os
 from typing import Awaitable, Callable
 
 from .v2.models import Location, MinimalLocation, Player, EmergencyCall
 import math
 
 type PositionLike = Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float]
+
+def _read_env_var(key: str, default: str | None = None) -> str:
+    value = os.getenv(key, default)
+    if value is None:
+        raise ValueError(f"Environment variable '{key}' is required.")
+    return value
 
 def get_distance_between_locations(
     location1: PositionLike,
