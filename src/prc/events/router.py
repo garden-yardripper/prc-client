@@ -37,7 +37,7 @@ class Router:
         
         Routers allow you to register both sync and async handlers,
         and the library will take care of running them in the appropriate context.
-
+        
         All handlers must take in a context parameter which contains information about the event
         and helper methods for replying to the event, like so:
         
@@ -51,6 +51,14 @@ class Router:
         Context objects will have an injected `client` attribute
         which is the client instance associated with this router.
         
+        Please note that you are responsible for creating an endpoint for the game to use 
+        with a (preferrably) ASGI API framework of choosing (
+            [FastAPI](https://fastapi.tiangolo.com/),
+            [Starlette](https://www.starlette.dev/),
+            [Quart](https://quart.palletsprojects.com/en/latest/),
+        etc.).
+        This is to ensure compatability with any service that works best for your application's needs.
+        
         Arguments
         ----------
         client: `ClientType`
@@ -61,6 +69,7 @@ class Router:
             Setting to `False` will cause synchronous handlers to block the event loop.
             Defaults to `True`.
         """
+        
         # prevent circular import
         from .integrations import _FastApiIntegration, _QuartIntegration, _StarletteIntegration
         
