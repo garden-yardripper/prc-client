@@ -1,5 +1,8 @@
+import logging
 from ..base_client import _BaseApiClient
 from .models import Endpoint, Server, BundledServer
+
+logger = logging.getLogger(__name__)
 
 def _format_bool_params(mapping: dict[str, bool]) -> dict[str, str]:
     return {k: "true" if v else "false" for k, v in mapping.items()}
@@ -41,6 +44,8 @@ class _GetServer(_BaseApiClient):
             "Vehicles": vehicles
         })
         
+        logger.info("Fetching server data with params", extra=params)
+        
         response = await self._send_async_request(
             endpoint=Endpoint.v2_server,
             params=params
@@ -49,6 +54,7 @@ class _GetServer(_BaseApiClient):
         return Server.model_validate(response.json())
     
     async def _get_bundled_server_async(self) -> BundledServer:
+        logger.info("Fetching bundled server data.")
         response = await self._send_async_request(
             endpoint=Endpoint.v2_server,
             params=ALL_DATA_PARAMS
@@ -80,6 +86,8 @@ class _GetServer(_BaseApiClient):
             "Vehicles": vehicles
         })
         
+        logger.info("Fetching server data with params", extra=params)
+        
         response = self._send_sync_request(
             endpoint=Endpoint.v2_server,
             params=params
@@ -88,6 +96,7 @@ class _GetServer(_BaseApiClient):
         return Server.model_validate(response.json())
         
     def _get_bundled_server_sync(self) -> BundledServer:
+        logger.info("Fetching bundled server data.")
         response = self._send_sync_request(
             endpoint=Endpoint.v2_server,
             params=ALL_DATA_PARAMS
