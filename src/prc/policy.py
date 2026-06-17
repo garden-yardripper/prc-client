@@ -1,9 +1,12 @@
+import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from .exceptions import CommandPolicyViolation
 
 if TYPE_CHECKING:
     from .command import Command, CommandLike
+    
+logger = logging.getLogger(__name__)
 
 @dataclass
 class CommandPreview:
@@ -72,10 +75,13 @@ class CommandPolicy:
             command = Command(text=command)
         
         if command.command in self.blacklist:
+            logger.warning("Command '%s' is blacklisted.", command.text)
             preview = CommandPreview(command, allowed=False, reason="Command blacklisted")
         elif command.command not in self.whitelist:
+            logger.warning("Command '%s' is not whitelisted.", command.text)
             preview = CommandPreview(command, allowed=False, reason="Command not whitelisted")
         elif self.max_length and len(command.text) > self.max_length:
+            logger.warning("Command '%s' exceeds maximum length.", command.text)
             preview = CommandPreview(command, allowed=False, reason="Command too long")
         else:
             preview = CommandPreview(command, allowed=True, reason=None)
