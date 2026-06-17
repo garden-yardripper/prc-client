@@ -1,6 +1,8 @@
 # prc-client
 `prc-client` is a flexible, feature-rich API client for the ER:LC private server API. This client provides a simple and intuitive interface for interacting with ER:LC private servers with detailed data models, typing, comprehensive error handling, and a high-performance architecture.
 
+This library aims to provide all the functionality you need without overwhelming developers with unnecessary features or complexity. `prc-client` stays lightweight, allowing for full control over your development process - whether you're building a simple automation script to fully-featured complex application integrating with the PRC API.
+
 # Key Features
 - 100% coverage of all V1 and V2 API endpoints
 - Full support for the event webhook API
