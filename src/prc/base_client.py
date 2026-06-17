@@ -4,7 +4,6 @@ import time
 import asyncio
 from typing import Literal, Self, cast
 import httpx
-from dataclasses import dataclass
 
 from .policy import CommandPolicy
 from .v2.models import Endpoint as V2Endpoint
@@ -31,13 +30,6 @@ def create_sync_client(server_key: str, **kwargs) -> httpx.Client:
         headers={"server-key": server_key},
         **kwargs
     )
-
-@dataclass
-class RateLimitConfig:
-    wait_for_rate_limit: bool = True
-    retry_on_rate_limit: bool = True
-    
-    max_retries: int = 5
 
 class _AsyncContext:
     server_key: str
@@ -74,7 +66,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         server_key: str,
         *,
         policy: CommandPolicy | None = None,
-        rate_limit_config: RateLimitConfig = RateLimitConfig(),
+        wait_for_rate_limit: bool = True,
         connection: HTTPXClient | None = None
     ) -> None:
         """
@@ -93,7 +85,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         from .v2.client import AsyncClient # prevent circular import
         self.server_key: str = server_key
         self.policy = policy
-        self.rate_limit_config = rate_limit_config
+        self.wait_for_rate_limit = wait_for_rate_limit
         self.connection: HTTPXClient | None = connection
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), AsyncClient)
@@ -169,7 +161,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send async request; connection is not an async client.")
         
         method = self._get_method(endpoint)
-        if self.rate_limit_config.wait_for_rate_limit:
+        if self.wait_for_rate_limit:
             async with cast(asyncio.Lock, self.lock):
                 if method == "GET":
                     wait_for = self._get_wait_time()
@@ -207,7 +199,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Cannot send sync request; connection is not a sync client.")
         
         method = self._get_method(endpoint)
-        if self.rate_limit_config.wait_for_rate_limit:
+        if self.wait_for_rate_limit:
             with cast(threading.Lock, self.lock):
                 if method == "GET":
                     wait_for = self._get_wait_time()
