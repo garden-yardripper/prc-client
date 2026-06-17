@@ -91,7 +91,7 @@ class _GetDataSync(_BaseApiClient):
     def get_queue(self) -> Queue:
         logger.info("Fetching queue data.")
         response = self._send_sync_request(endpoint=Endpoint.queue)
-        return Queue.model_validate(response.json())
+        return Queue.model_validate({"Players": response.json()})
     
     def get_kill_logs(self) -> list[KillLog]:
         logger.info("Fetching kill logs data.")
@@ -111,7 +111,7 @@ class _GetDataSync(_BaseApiClient):
     def get_bans(self) -> Bans:
         logger.info("Fetching bans data.")
         response = self._send_sync_request(endpoint=Endpoint.bans)
-        return Bans.model_validate(response.json())
+        return Bans.model_validate({"Users": response.json()})
 
     def get_vehicles(self) -> list[Vehicle]:
         logger.info("Fetching vehicles data.")
