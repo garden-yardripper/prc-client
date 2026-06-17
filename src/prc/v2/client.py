@@ -10,8 +10,6 @@ from .send_command import _SendCommand
 if TYPE_CHECKING:
     from ..command import AnyUserType, CommandLike
 
-type ClientType = AsyncClient | Client
-
 def _get_player_in_server_from_user(server: Server, user: "AnyUserType", partial_match: bool) -> Player:
     if isinstance(user, Player):
         return user

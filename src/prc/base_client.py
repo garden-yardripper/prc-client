@@ -1,3 +1,4 @@
+from typing import Literal, Self, cast, TYPE_CHECKING
 import logging
 import threading
 import time
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+type ClientType = "V2AsyncClient | V2Client | V1AsyncClient | V1Client"
 type HTTPXClient = httpx.Client | httpx.AsyncClient
 type EndpointType = V1Endpoint | V2Endpoint
 
@@ -84,7 +86,6 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         connection: `HTTPXClient` | `None` (optional)
             An existing HTTPX client to use. If not provided, a new one will be created.
         """
-        
         # prevent circular import
         from .v2.client import AsyncClient as V2AsyncClient
         from .v1.client import AsyncClient as V1AsyncClient

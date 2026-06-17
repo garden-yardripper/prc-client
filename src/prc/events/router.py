@@ -17,7 +17,7 @@ except ImportError:
 
 from ..exceptions import InvalidSignatureError, MissingSignatureError
 from ..utils import maybe_coro
-from ..v2.client import ClientType
+from ..base_client import ClientType
 from .decorators import _On
 from .models import EventBatch
 
