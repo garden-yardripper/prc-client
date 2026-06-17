@@ -3,12 +3,10 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 from httpx import Response
-from .v2.models import (
-    Player as V2Player,
-    FullUser as V2FullUser,
-    UsernameUser as V2UsernameUser,
-    IdUser as V2IdUser
-)
+
+from .users import FullUser, UsernameUser, IdUser
+from .v2.models import Player as V2Player
+from .v1.models import Player as V1Player
 
 if TYPE_CHECKING:
     from .v2.client import AsyncClient as V2AsyncClient, Client as V2Client
@@ -77,9 +75,9 @@ class Command:
         )
 
 # define user types
-type AnyUserType = V2Player | V2FullUser | V2UsernameUser | V2IdUser | str | int
-type UsernameUserType = V2Player | V2FullUser | V2UsernameUser | str
-type IdUserType = V2Player | V2FullUser | V2IdUser | int
+type AnyUserType = V2Player | V1Player | FullUser | UsernameUser | IdUser | str | int
+type UsernameUserType = V2Player | V1Player | FullUser | UsernameUser | str
+type IdUserType = V2Player | V1Player | FullUser | IdUser | int
 
 type CommandLike = Command | str
 
@@ -128,22 +126,22 @@ class _CmdFactory:
                 if isinstance(arg, Sequence) and not isinstance(arg, (str, bytes)):
                     items: list[str] = []
                     for item in arg:
-                        if isinstance(item, V2Player):
+                        if isinstance(item, (V2Player, V1Player)):
                             items.append(item.user.name)
-                        elif isinstance(item, (V2UsernameUser, V2FullUser)):
+                        elif isinstance(item, (UsernameUser, FullUser)):
                             items.append(item.name)
-                        elif isinstance(item, V2IdUser):
+                        elif isinstance(item, IdUser):
                             items.append(str(item.id))
                         else:
                             items.append(str(item))
                     parsed.append(','.join(items))
                 else:
                     item = arg
-                    if isinstance(item, V2Player):
+                    if isinstance(item, (V2Player, V1Player)):
                         parsed.append(item.user.name)
-                    elif isinstance(item, (V2UsernameUser, V2FullUser)):
+                    elif isinstance(item, (UsernameUser, FullUser)):
                         parsed.append(item.name)
-                    elif isinstance(item, V2IdUser):
+                    elif isinstance(item, IdUser):
                         parsed.append(str(item.id))
                     else:
                         parsed.append(str(item))
