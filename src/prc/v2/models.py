@@ -54,8 +54,6 @@ class Location(MinimalLocation):
     postal_code: int
     street_name: str
     building_number: int
-    
-# possibly add command model
 
 class Vehicle(BaseModel):
     """Represents an in-game vehicle.
