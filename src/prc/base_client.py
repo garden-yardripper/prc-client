@@ -151,12 +151,13 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         if self.rate_limit_config.wait_for_rate_limit:
             async with cast(asyncio.Lock, self.lock):
                 if method == "GET":
-                    if self.get_on_cooldown:
-                        await self.await_for_get_cooldown()
+                    wait_for = self._get_wait_time()
                 else:
-                    if self.post_on_cooldown:
-                        await self.await_for_post_cooldown()
-                        
+                    wait_for = self._post_wait_time()
+                    
+                if wait_for > 0:
+                    await asyncio.sleep(wait_for)
+                                            
                 resp = await self.connection.request(method, endpoint.value, **kwargs)
                 self._update_ratelimit(resp)
                 self._raise_for_status(resp)
@@ -181,12 +182,13 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         if self.rate_limit_config.wait_for_rate_limit:
             with cast(threading.Lock, self.lock):
                 if method == "GET":
-                    if self.get_on_cooldown:
-                        self.wait_for_get_cooldown()
+                    wait_for = self._get_wait_time()
                 else:
-                    if self.post_on_cooldown:
-                        self.wait_for_post_cooldown()
-                        
+                    wait_for = self._post_wait_time()
+                    
+                if wait_for > 0:
+                    time.sleep(wait_for)
+                    
                 resp = self.connection.request(method, endpoint.value, **kwargs)
                 self._update_ratelimit(resp)
                 self._raise_for_status(resp)
@@ -199,36 +201,13 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         return resp
     
-    @property
-    def get_on_cooldown(self) -> bool:
-        return self.get_remaining <= 0 and self.get_expiration > time.time()
+    def _get_wait_time(self) -> float:
+        if self.get_remaining > 0:
+            return 0.0
+        return max(self.get_expiration - time.time() + 1, 0)
     
-    @property
-    def post_on_cooldown(self) -> bool:
-        return self.post_expiration > time.time()
-    
-    def wait_for_get_cooldown(self):
-        if self.is_async:
-            raise RuntimeError("Client is not synchronous - use 'await_for_get_cooldown' instead.")
-        if self.get_remaining <= 0:
-            # add 1 second for redundancy
-            time.sleep(max(self.get_expiration - time.time() + 1, 0))
-        
-    async def await_for_get_cooldown(self):
-        if not self.is_async:
-            raise RuntimeError("Client is not async - use 'wait_for_get_cooldown' instead.")
-        if self.get_remaining <= 0:
-            await asyncio.sleep(max(self.get_expiration - time.time() + 1, 0))
-            
-    def wait_for_post_cooldown(self):
-        if self.is_async:
-            raise RuntimeError("Client is not synchronous - use 'await_for_get_cooldown' instead.")
-        time.sleep(max(self.post_expiration - time.time() + 1, 0))
-        
-    async def await_for_post_cooldown(self):
-        if not self.is_async:
-            raise RuntimeError("Client is not async - use 'wait_for_get_cooldown' instead.")
-        await asyncio.sleep(max(self.post_expiration - time.time() + 1, 0))
+    def _post_wait_time(self) -> float:
+        return max(self.post_expiration - time.time() + 1, 0)
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
