@@ -9,6 +9,19 @@ dependencies = [
     "pydantic>=2.13.4",
 ]
 
+authors = [
+    { name = "garden-yardripper", email = "gardenyardripper@gmail.com" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+
 [project.optional-dependencies]
 events = [
     "cryptography>=49.0.0",
@@ -30,6 +43,10 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "respx>=0.23.1",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
