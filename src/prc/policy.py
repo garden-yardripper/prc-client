@@ -1,6 +1,9 @@
 from dataclasses import dataclass
-from .command import Command, CommandLike, normalize_command
+from typing import TYPE_CHECKING
 from .exceptions import CommandPolicyViolation
+
+if TYPE_CHECKING:
+    from .command import Command, CommandLike
 
 @dataclass
 class CommandPreview:
@@ -15,7 +18,7 @@ class CommandPreview:
     reason: `str` | `None`
         The reason the command is not allowed.
     """
-    command: Command
+    command: "Command"
     allowed: bool
     reason: str | None
 
@@ -36,13 +39,16 @@ class CommandPolicy:
         max_length: `int` (optional)
             The maximum length of a command. Defaults to 120.
         """
+        # prevent circular import
+        from .command import normalize_command
+        
         whitelist = whitelist or set()
         blacklist = blacklist or set()
         self.whitelist = {normalize_command(cmd) for cmd in whitelist}
         self.blacklist = {normalize_command(cmd) for cmd in blacklist}
         self.max_length = max_length
     
-    def preview_command(self, command: CommandLike, *, raise_for_status: bool = False) -> CommandPreview:
+    def preview_command(self, command: "CommandLike", *, raise_for_status: bool = False) -> CommandPreview:
         """Previews a command against this policy, returning a `CommandPreview` object
         or raising a `CommandPolicyViolation` if the command is not allowed and `raise_for_status` is `True`.
         
@@ -61,6 +67,8 @@ class CommandPolicy:
             The preview of the command.
         """
         if isinstance(command, str):
+            # prevent circular import
+            from .command import Command
             command = Command(text=command)
         
         if command.command in self.blacklist:

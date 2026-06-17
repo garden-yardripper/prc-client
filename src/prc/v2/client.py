@@ -1,14 +1,17 @@
+from typing import TYPE_CHECKING
 from httpx import Response
 
 from ..users import FullUser, IdUser, UsernameUser
 from .models import Player, Server, BundledServer
 from .server import _GetServer
-from ..command import AnyUserType, CommandLike
 from .send_command import _SendCommand
+
+if TYPE_CHECKING:
+    from ..command import AnyUserType, CommandLike
 
 type ClientType = AsyncClient | Client
 
-def _get_player_in_server_from_user(server: Server, user: AnyUserType, partial_match: bool) -> Player:
+def _get_player_in_server_from_user(server: Server, user: "AnyUserType", partial_match: bool) -> Player:
     if isinstance(user, Player):
         return user
     
@@ -71,7 +74,7 @@ class AsyncClient(_GetServer, _SendCommand):
         """Get a `BundledServer` object with all server data available."""
         return await self._get_bundled_server_async()
     
-    async def send_command(self, command: CommandLike) -> Response:
+    async def send_command(self, command: "CommandLike") -> Response:
         """Send a command to the server.
 
         Parameters
@@ -90,7 +93,7 @@ class AsyncClient(_GetServer, _SendCommand):
     
     async def get_player_from_user(
         self,
-        user: AnyUserType,
+        user: "AnyUserType",
         server: Server | None = None,
         *,
         partial_match: bool = False
@@ -157,7 +160,7 @@ class Client(_GetServer, _SendCommand):
         """Get a `BundledServer` object with all server data available."""
         return self._get_bundled_server_sync()
     
-    def send_command(self, command: CommandLike) -> Response:
+    def send_command(self, command: "CommandLike") -> Response:
         """Send a command to the server.
 
         Parameters
@@ -176,7 +179,7 @@ class Client(_GetServer, _SendCommand):
     
     def get_player_from_user(
         self,
-        user: AnyUserType,
+        user: "AnyUserType",
         server: Server | None = None,
         *,
         partial_match: bool = False
