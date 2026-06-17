@@ -6,10 +6,12 @@ class _On:
     def __init__(self, router: "Router") -> None:
         self.router = router
         
-    def command(self, command: str):
+    def command(self, command: str, *commands: str):
         """Register a function to be called when a specific command is run in-game."""
         def wrapper(func):
             self.router._add_command(func, command)
+            for cmd in commands:
+                self.router._add_command(func, cmd)
             return func
         return wrapper
     
@@ -20,10 +22,12 @@ class _On:
             return func
         return wrapper
     
-    def custom_event(self, event_name: str):
+    def custom_event(self, event_name: str, *event_names: str):
         """Register a function to be called when a custom event with the specified name is received."""
         def wrapper(func):
             self.router._add_function(func, event_name)
+            for name in event_names:
+                self.router._add_function(func, name)
             return func
         return wrapper
     
