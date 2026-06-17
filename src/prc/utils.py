@@ -2,12 +2,13 @@ import asyncio
 import inspect
 import logging
 import os
-from typing import Awaitable, Callable
-
-from .v2.models import Location, MinimalLocation, Player, EmergencyCall
 import math
+from typing import Awaitable, Callable, TYPE_CHECKING
 
-type PositionLike = Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float]
+if TYPE_CHECKING:
+    from .v2.models import Location, MinimalLocation, Player, EmergencyCall
+
+type PositionLike = "Location | MinimalLocation | Player | EmergencyCall | tuple[int | float, int | float]"
 
 def _read_env_var(key: str, default: str | None = None) -> str:
     value = os.getenv(key, default)

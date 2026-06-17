@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
 from ..users import IdUser
 from ..v2.models import EmergencyCall
-from ..v2.client import ClientType, Client, AsyncClient
+from ..v2.client import Client, AsyncClient
 from ..command import cmd
 
 @dataclass
@@ -23,7 +23,7 @@ class CustomCommand:
     command: str
     argument: str
 
-class Context[T: ClientType](BaseModel):
+class Context[T: (Client, AsyncClient)](BaseModel):
     """Represents the context of an in-game event.
     
     Use the `emergency_call` and `command` properties to obtain specific context data.

@@ -2,13 +2,16 @@ import logging
 import threading
 import time
 import asyncio
-from typing import Literal, Self, cast
 import httpx
 
 from .policy import CommandPolicy
 from .v2.models import Endpoint as V2Endpoint
 from .v1.models import Endpoint as V1Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
+
+if TYPE_CHECKING:
+    from .v2.client import AsyncClient as V2AsyncClient, Client as V2Client
+    from .v1.client import AsyncClient as V1AsyncClient, Client as V1Client
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +88,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         # prevent circular import
         from .v2.client import AsyncClient as V2AsyncClient
         from .v1.client import AsyncClient as V1AsyncClient
+        
         self.server_key: str = server_key
         self.policy = policy
         self.wait_for_rate_limit = wait_for_rate_limit
