@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import logging
 from typing import Awaitable, Callable
 
 from .v2.models import Location, MinimalLocation, Player, EmergencyCall
@@ -39,6 +40,21 @@ def get_distance_between_locations(
         position2 = location2.position
     
     return math.dist(position1, position2)
+
+def enable_debug_logging() -> None:
+    """Utility function to enable debug logging for the PRC module."""
+    logger = logging.getLogger("prc")
+    logger.setLevel(logging.DEBUG)
+    
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    
+    logger.addHandler(handler)
+    
+    logger.debug("Debug logging enabled for prc-client.")
 
 async def maybe_coro[T](
     func: Callable[..., T] | Awaitable[T] | Callable[..., Awaitable[T]],
