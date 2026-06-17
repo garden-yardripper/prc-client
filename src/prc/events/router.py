@@ -35,6 +35,22 @@ class Router:
         
         Use the `router.on` decorators to register event handlers.
         
+        Routers allow you to register both sync and async handlers,
+        and the library will take care of running them in the appropriate context.
+
+        All handlers must take in a context parameter which contains information about the event
+        and helper methods for replying to the event, like so:
+        
+        ```python
+        @router.on.command("mycommand")
+        async def handle_my_command(ctx: Context[prc.v2.AsyncClient]):
+            # handle ;mycommand, and use ctx to reply or get info about the event
+            # you can optionally specify the client type in the context for better type hints
+        ```
+        
+        Context objects will have an injected `client` attribute
+        which is the client instance associated with this router.
+        
         Arguments
         ----------
         client: `ClientType`
@@ -145,6 +161,29 @@ class Router:
                 raise ExceptionGroup("One or more command/event handlers raised exceptions.", excs)
                     
     async def prepare_request(self, raw_body: bytes, headers: dict) -> tuple[Literal[200, 400], Callable | None]:
+        """Verify an incoming request and prepare for dispatching if the signature is valid.
+        
+        This method will verify the request signature return the appropriate HTTP status code
+        and dispatch job if the signature is valid.
+        
+        It is recommended to use the provided integration methods for FastAPI, Quart, or Starlette
+        instead of calling this method directly, as they will handle the background task scheduling for you.
+        
+        Arguments
+        ---------
+        raw_body: `bytes`
+            The raw body of the incoming request. **IMPORTANT:** This must be the raw body as bytes
+            exactly as received by the API. Ensure that your framework doesn't attempt to parse or decode the body
+            before passing it to this method.
+        headers: `dict`
+            The **full** headers of the incoming request.
+        
+        Returns
+        -------
+        `tuple[Literal[200, 400], Callable | None]`
+            A tuple containing the appropriate HTTP status code and the dispatch job if the signature is valid,
+            or `None` if the signature is invalid.
+        """
         try:
             self._verify_prc_request(raw_body, headers)
             status = 200
@@ -164,12 +203,62 @@ class Router:
         request: "FastRequest",
         background_tasks: "FastBackgroundTasks"
     ) -> Literal[200, 400]:
+        """Handle an incoming FastAPI request containing a PRC event batch.
+        
+        This method will automatically handle signature verification and event dispatching,
+        adding dispatching to background tasks, and immediately returning the appropriate HTTP status code.
+        
+        Arguments
+        ---------
+        request: `fastapi.Request`
+            The incoming FastAPI request object.
+        background_tasks: `fastapi.BackgroundTasks`
+            The FastAPI `BackgroundTasks` instance to use for scheduling event handler execution.
+        
+        Returns
+        -------
+        `Literal[200, 400]`
+            The appropriate HTTP status code to return to the PRC server (200 for success, 400 for invalid signature).
+        """
         return await self._fastapi.handle_fastapi_request(request, background_tasks)
     
     async def handle_quart_request(self, app: "Quart") -> Literal[200, 400]:
+        """Handle an incoming Quart request containing a PRC event batch.
+        
+        This method will automatically handle signature verification and event dispatching,
+        adding dispatching to background tasks, and immediately returning the appropriate HTTP status code.
+        
+        Arguments
+        ---------
+        app: `quart.Quart`
+            The Quart app instance to use for scheduling event handler execution.
+        
+        Returns
+        -------
+        `Literal[200, 400]`
+            The appropriate HTTP status code to return to the PRC server (200 for success, 400 for invalid signature).
+        """
         return await self._quart.handle_quart_request(app)
     
     async def handle_starlette_request(
         self, request: "StarletteRequest"
     ) -> tuple[Literal[200, 400], "StarletteBackgroundTask | None"]:
+        """Handle an incoming Starlette request containing a PRC event batch.
+        
+        This method will automatically handle signature verification and event dispatching,
+        creating the BackgroundTask instance and returning the appropriate HTTP status code.
+        
+        Arguments
+        ---------
+        request: `starlette.requests.Request`
+            The incoming Starlette request object.
+        
+        Returns
+        -------
+        `tuple[Literal[200, 400], starlette.background.BackgroundTask | None]`
+            A tuple containing the appropriate HTTP status code to return to the PRC server
+            (200 for success, 400 for invalid signature)
+            and the Starlette `BackgroundTask` instance to add to the `Response` for dispatching
+            if the signature is valid, or `None` if the signature is invalid.
+        """
         return await self._starlette.handle_starlette_request(request)
