@@ -1,3 +1,4 @@
+import logging
 import asyncio
 import base64
 import binascii
@@ -29,6 +30,8 @@ if TYPE_CHECKING:
 ANY_COMMAND = object()
 ANY_EVENT = object()
 
+logger = logging.getLogger(__name__)
+
 class Router:
     def __init__(self, client: ClientType, *, sync_handlers_to_thread: bool = True) -> None:
         """Initialize a new `Router` instance to handle event routing and request verification.
@@ -52,8 +55,8 @@ class Router:
         which is the client instance associated with this router.
         
         Please note that you are responsible for creating an endpoint for the game to use 
-        with a (preferrably) ASGI API framework of choosing (
-            [FastAPI](https://fastapi.tiangolo.com/),
+        with a (preferrably) ASGI API framework of choosing 
+            ([FastAPI](https://fastapi.tiangolo.com/),
             [Starlette](https://www.starlette.dev/),
             [Quart](https://quart.palletsprojects.com/en/latest/),
         etc.).
@@ -93,17 +96,22 @@ class Router:
         event_type: Literal["EmergencyCallStarted", "WebhookProbe"] | str | None
     ):
         if event_type:
+            logger.debug("Registering handler '%s' for event type '%s'.", func.__name__, event_type)
             self._handlers.setdefault(event_type, []).append(func)
         else:
+            logger.debug("Registering handler '%s' for any event type.", func.__name__)
             self._handlers.setdefault(ANY_EVENT, []).append(func)
         
     def _add_command(self, func: Callable, name: str | None):
         if name:
+            logger.debug("Registering handler '%s' for command '%s'.", func.__name__, name)
             self._commands.setdefault(name, []).append(func)
         else:
+            logger.debug("Registering handler '%s' for any command.", func.__name__)
             self._commands.setdefault(ANY_COMMAND, []).append(func)
     
     def _decode_verified_body(self, raw_body: bytes) -> EventBatch:
+        logger.debug("Decoding verified request body and injecting client.")
         batch = EventBatch.model_validate_json(raw_body)
         for event in batch.events:
             event._client = self.client
@@ -112,30 +120,37 @@ class Router:
     
     def _verify_signature(self, raw_body: bytes, sighex: str, timestamp: str) -> bool:
         if not isinstance(self._public_key, Ed25519PublicKey):
+            logger.error("Invalid public key type. Expected Ed25519PublicKey, got %s.", type(self._public_key))
             return False
         
         message = timestamp.encode() + raw_body
         sighex_bytes = binascii.unhexlify(sighex)
         
         try:
+            logger.info("Request signature is VALID.")
             self._public_key.verify(sighex_bytes, message)
             return True
         except InvalidSignature:
+            logger.info("Request signature is INVALID.")
             return False 
             
     def _verify_prc_request(self, raw_body: bytes, headers: dict):
+        logger.debug("Verifying incoming PRC request signature.")
         normalized_headers = {k.lower(): v for k, v in headers.items()}
         sighex = normalized_headers.get("x-signature-ed25519")
         timestamp = normalized_headers.get("x-signature-timestamp")
         
         if not sighex or not timestamp:
+            logger.info("Missing signature headers in the request.")
             raise MissingSignatureError
         
         valid = self._verify_signature(raw_body, sighex, timestamp)
         if not valid:
+            logger.info("Invalid signature for incoming request.")
             raise InvalidSignatureError   
     
     async def _dispatch_async(self, batch: EventBatch):
+        logger.info("Dispatching event batch with %d events.", len(batch.events))
         for e in batch.events:
             event_type = e.event_type
             
@@ -159,6 +174,7 @@ class Router:
             if not funcs:
                 continue
             
+            logger.info("Dispatching event of type '%s' to %d handlers.", event_type, len(funcs))
             coros = [
                 maybe_coro(func, e, sync_to_thread=self.sync_handlers_to_thread)
                 for func in funcs
@@ -167,6 +183,7 @@ class Router:
             
             excs = [res for res in results if isinstance(res, Exception)]
             if excs:
+                logger.error("One or more handlers raised exceptions during dispatch.")
                 raise ExceptionGroup("One or more command/event handlers raised exceptions.", excs)
                     
     async def prepare_request(self, raw_body: bytes, headers: dict) -> tuple[Literal[200, 400], Callable | None]:
@@ -193,6 +210,7 @@ class Router:
             A tuple containing the appropriate HTTP status code and the dispatch job if the signature is valid,
             or `None` if the signature is invalid.
         """
+        logger.info("Preparing incoming request for dispatch.")
         try:
             self._verify_prc_request(raw_body, headers)
             status = 200
@@ -229,6 +247,7 @@ class Router:
         `Literal[200, 400]`
             The appropriate HTTP status code to return to the PRC server (200 for success, 400 for invalid signature).
         """
+        logger.debug("Handling incoming FastAPI request for event batch.")
         return await self._fastapi.handle_fastapi_request(request, background_tasks)
     
     async def handle_quart_request(self, app: "Quart") -> Literal[200, 400]:
@@ -247,6 +266,7 @@ class Router:
         `Literal[200, 400]`
             The appropriate HTTP status code to return to the PRC server (200 for success, 400 for invalid signature).
         """
+        logger.debug("Handling incoming Quart request for event batch.")
         return await self._quart.handle_quart_request(app)
     
     async def handle_starlette_request(
@@ -270,4 +290,5 @@ class Router:
             and the Starlette `BackgroundTask` instance to add to the `Response` for dispatching
             if the signature is valid, or `None` if the signature is invalid.
         """
+        logger.debug("Handling incoming Starlette request for event batch.")
         return await self._starlette.handle_starlette_request(request)
