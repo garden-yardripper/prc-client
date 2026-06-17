@@ -111,17 +111,15 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def _raise_for_status(self, resp: httpx.Response):
         body = resp.json()
         if resp.status_code == 429:
+            logger.error("Currently being rate-limited by PRC.", extra=body)
             try:
-                logger.error("Currently being rate-limited by PRC.", extra=body)
                 raise RateLimited.from_dict(body)
             except DeserializationError:
-                error_data = {
-                    "code": 429,
-                    "message": "API call failed (rate limited by PRC - unknown refresh_after).",
-                    "retry_after": 0.0
-                }
-                logger.error("Currently being rate-limited by PRC.", extra=error_data)
-                raise RateLimited(**error_data)
+                raise RateLimited(
+                    code=429,
+                    message="API call failed (rate limited by PRC - unknown refresh_after).",
+                    retry_after=0.0
+                )
                 
         if resp.status_code != 200:
             try:
