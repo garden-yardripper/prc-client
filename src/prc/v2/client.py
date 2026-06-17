@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING
 from httpx import Response
 
@@ -8,6 +9,8 @@ from .send_command import _SendCommand
 
 if TYPE_CHECKING:
     from ..command import AnyUserType, CommandLike
+    
+logger = logging.getLogger(__name__)
 
 type ClientType = AsyncClient | Client
 
@@ -39,7 +42,11 @@ def _get_player_in_server_from_user(server: Server, user: "AnyUserType", partial
                 name_search is not None and player.user.name == name_search
             ):
                 return player
-            
+    
+    logger.warning(
+        "User '%s' not found in server with ID search '%s' and name search '%s'.",
+        user, id_search, name_search
+    )
     raise ValueError("User not found in server")
 
 class AsyncClient(_GetServer, _SendCommand):
@@ -58,20 +65,24 @@ class AsyncClient(_GetServer, _SendCommand):
     ) -> Server:
         """Get a `Server` object with only the specified data.
         Use parameters to control which data is included."""
-        return await self._get_server_async(
-            players=players,
-            staff=staff,
-            join_logs=join_logs,
-            queue=queue,
-            kill_logs=kill_logs,
-            command_logs=command_logs,
-            mod_calls=mod_calls,
-            emergency_calls=emergency_calls,
-            vehicles=vehicles
-        )
+        kwargs = {
+            "players": players,
+            "staff": staff,
+            "join_logs": join_logs,
+            "queue": queue,
+            "kill_logs": kill_logs,
+            "command_logs": command_logs,
+            "mod_calls": mod_calls,
+            "emergency_calls": emergency_calls,
+            "vehicles": vehicles
+        }
+        
+        logger.info("Fetching server data with specified parameters.", extra=kwargs)
+        return await self._get_server_async(**kwargs)
     
     async def get_bundled_server(self) -> BundledServer:
         """Get a `BundledServer` object with all server data available."""
+        logger.info("Fetching bundled server data.")
         return await self._get_bundled_server_async()
     
     async def send_command(self, command: "CommandLike") -> Response:
@@ -87,6 +98,10 @@ class AsyncClient(_GetServer, _SendCommand):
         `Response`
             The raw HTTPX response from the server.
         """
+        logger.info(
+            "Sending command to server.",
+            extra={"command": command if isinstance(command, str) else command.text}
+        )
         if self.policy:
             self.policy.preview_command(command, raise_for_status=True)
         return await self._send_command_async(command)
@@ -144,20 +159,23 @@ class Client(_GetServer, _SendCommand):
     ) -> Server:
         """Get a lean `Server` object with only the specified data.
         Use parameters to control which data is included in the response."""
-        return self._get_server_sync(
-            players=players,
-            staff=staff,
-            join_logs=join_logs,
-            queue=queue,
-            kill_logs=kill_logs,
-            command_logs=command_logs,
-            mod_calls=mod_calls,
-            emergency_calls=emergency_calls,
-            vehicles=vehicles
-        )
+        kwargs = {
+            "players": players,
+            "staff": staff,
+            "join_logs": join_logs,
+            "queue": queue,
+            "kill_logs": kill_logs,
+            "command_logs": command_logs,
+            "mod_calls": mod_calls,
+            "emergency_calls": emergency_calls,
+            "vehicles": vehicles
+        }
+        logger.info("Fetching server data with specified parameters.", extra=kwargs)
+        return self._get_server_sync(**kwargs)
     
     def get_bundled_server(self) -> BundledServer:
         """Get a `BundledServer` object with all server data available."""
+        logger.info("Fetching bundled server data.")
         return self._get_bundled_server_sync()
     
     def send_command(self, command: "CommandLike") -> Response:
@@ -173,6 +191,10 @@ class Client(_GetServer, _SendCommand):
         `Response`
             The raw HTTPX response from the server.
         """
+        logger.info(
+            "Sending command to server.",
+            extra={"command": command if isinstance(command, str) else command.text}
+        )
         if self.policy:
             self.policy.preview_command(command, raise_for_status=True)
         return self._send_command_sync(command)
