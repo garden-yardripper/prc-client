@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
@@ -11,6 +12,8 @@ from .v2.models import (
 
 if TYPE_CHECKING:
     from .v2.client import AsyncClient as V2AsyncClient, Client as V2Client
+    
+logger = logging.getLogger(__name__)
 
 def normalize_command(command: str) -> str:
     """Normalize a command by ensuring it starts with a colon."""
@@ -47,10 +50,12 @@ class Command:
     
     async def asend(self, client: "V2AsyncClient"):
         """Sends this command to the API using the provided asynchronous client."""
+        logger.info("Sending async command: '%s'", self.text)
         return await client.send_command(self)
     
     def send(self, client: "V2Client") -> Response:
         """Sends this command to the API using the provided synchronous client."""
+        logger.info("Sending sync command: '%s'", self.text)
         return client.send_command(self)
     
     @property
@@ -146,6 +151,8 @@ class _CmdFactory:
             # join the parsed arguments
             joined_args = ' '.join(parsed)
             full = f"{name} {joined_args}".strip()
+            logger.debug("Created command: '%s'", full)
+            
             return Command(text=full)
         return call
 
