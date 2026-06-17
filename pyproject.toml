@@ -22,6 +22,10 @@ classifiers = [
     "Typing :: Typed"
 ]
 
+[project.urls]
+Homepage = "https://github.com/garden-yardripper/prc-client"
+Issues = "https://github.com/garden-yardripper/prc-client/issues"
+
 [project.optional-dependencies]
 events = [
     "cryptography>=49.0.0",
