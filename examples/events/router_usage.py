@@ -4,7 +4,7 @@ import prc
 from prc import cmd
 from prc.events import Router, Context
 
-client = prc.v2.AsyncClient(server_key="nJbYdaPQCZhhCSCVRjFO-gbzaDhOJQTPrFVIjmNuyTYqzyqupLolnWfJmPznx")
+client = prc.v2.AsyncClient(server_key="...")
 
 # No need to send sync handlers to a thread in this example
 # because our sync handlers don't do any blocking operations,
