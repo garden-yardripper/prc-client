@@ -111,7 +111,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def _raise_for_status(self, resp: httpx.Response):
         body = resp.json()
         if resp.status_code == 429:
-            logger.error("Currently being rate-limited by PRC.", extra=body)
+            logger.error("Currently being rate-limited by PRC.", extra={"body": body})
             try:
                 raise RateLimited.from_dict(body)
             except DeserializationError:
@@ -123,7 +123,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
                 
         if resp.status_code != 200:
             try:
-                logger.error("API call failed with non-200 status code.", extra=body)
+                logger.error("API call failed with non-200 status code.", extra={"body": body})
                 raise ApiError.from_dict(body)
             except DeserializationError:
                 logger.error(
