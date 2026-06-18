@@ -6,6 +6,7 @@ import asyncio
 import httpx
 
 from .policy import CommandPolicy
+from .registry import UserRegistry
 from .v2.models import Endpoint as V2Endpoint
 from .v1.models import Endpoint as V1Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
@@ -96,6 +97,8 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.connection: HTTPXClient | None = connection
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
+        
+        self.registry = UserRegistry()
         
         # rate limit tracking attributes, updated on each request based on response headers
         self._post_expiration: int = int(time.time())

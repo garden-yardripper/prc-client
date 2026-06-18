@@ -3,7 +3,7 @@ from .users import FullUser, IdUser, StrictUserType, UsernameUser
 from .exceptions import DataNotRequestedError
 from itertools import chain
 
-class UserCache:
+class UserRegistry:
     def __init__(self):
         self._by_id: dict[int, FullUser] = {}
         self._by_username: dict[str, FullUser] = {}
