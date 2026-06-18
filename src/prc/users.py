@@ -1,4 +1,13 @@
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
+if TYPE_CHECKING:
+    from .v2.models import Player as V2Player
+    from .v1.models import Player as V1Player
+
+type AnyUserType = "V2Player | V1Player | FullUser | UsernameUser | IdUser | str | int"
+type UsernameUserType = "V2Player | V1Player | FullUser | UsernameUser | str"
+type IdUserType = "V2Player | V1Player | FullUser | IdUser | int"
+type StrictUserType = FullUser | UsernameUser | IdUser | str | int
 
 @dataclass(frozen=True)
 class UsernameUser:

@@ -7,6 +7,7 @@ from httpx import Response
 from .users import FullUser, UsernameUser, IdUser
 from .v2.models import Player as V2Player
 from .v1.models import Player as V1Player
+from .users import AnyUserType, UsernameUserType
 
 if TYPE_CHECKING:
     from .v2.client import AsyncClient as V2AsyncClient, Client as V2Client
@@ -73,11 +74,6 @@ class Command:
             self.text.startswith((f"{cmd} all", f"{cmd} others"))
             for cmd in type(self).dangerous_cmds
         )
-
-# define user types
-type AnyUserType = V2Player | V1Player | FullUser | UsernameUser | IdUser | str | int
-type UsernameUserType = V2Player | V1Player | FullUser | UsernameUser | str
-type IdUserType = V2Player | V1Player | FullUser | IdUser | int
 
 type CommandLike = Command | str
 
