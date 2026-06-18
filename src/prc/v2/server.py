@@ -51,7 +51,9 @@ class _GetServer(_BaseApiClient):
             params=params
         )
         
-        return Server.model_validate(response.json())
+        server = Server.model_validate(response.json())
+        self.registry._extract_user_data_from_server(server)
+        return server
     
     async def _get_bundled_server_async(self) -> BundledServer:
         logger.info("Fetching bundled server data.")
@@ -60,7 +62,9 @@ class _GetServer(_BaseApiClient):
             params=ALL_DATA_PARAMS
         )
         
-        return BundledServer.model_validate(response.json())
+        bundle = BundledServer.model_validate(response.json())
+        self.registry._extract_user_data_from_server(bundle)
+        return bundle
     
     def _get_server_sync(
         self, *,
@@ -93,7 +97,9 @@ class _GetServer(_BaseApiClient):
             params=params
         )
         
-        return Server.model_validate(response.json())
+        server = Server.model_validate(response.json())
+        self.registry._extract_user_data_from_server(server)
+        return server
         
     def _get_bundled_server_sync(self) -> BundledServer:
         logger.info("Fetching bundled server data.")
@@ -102,4 +108,6 @@ class _GetServer(_BaseApiClient):
             params=ALL_DATA_PARAMS
         )
         
-        return BundledServer.model_validate(response.json())
+        bundle = BundledServer.model_validate(response.json())
+        self.registry._extract_user_data_from_server(bundle)
+        return bundle
