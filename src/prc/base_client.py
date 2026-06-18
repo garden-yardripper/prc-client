@@ -72,6 +72,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         server_key: str,
         *,
         policy: CommandPolicy | None = None,
+        use_registry: bool = True,
         wait_for_rate_limit: bool = True,
         connection: HTTPXClient | None = None
     ) -> None:
@@ -98,7 +99,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         
-        self.registry = UserRegistry()
+        self.registry = UserRegistry() if use_registry else None
         
         # rate limit tracking attributes, updated on each request based on response headers
         self._post_expiration: int = int(time.time())

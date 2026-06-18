@@ -52,7 +52,8 @@ class _GetServer(_BaseApiClient):
         )
         
         server = Server.model_validate(response.json())
-        self.registry._extract_user_data_from_server(server)
+        if self.registry:
+            self.registry._extract_user_data_from_server(server)
         return server
     
     async def _get_bundled_server_async(self) -> BundledServer:
@@ -63,7 +64,8 @@ class _GetServer(_BaseApiClient):
         )
         
         bundle = BundledServer.model_validate(response.json())
-        self.registry._extract_user_data_from_server(bundle)
+        if self.registry:
+            self.registry._extract_user_data_from_server(bundle)
         return bundle
     
     def _get_server_sync(
@@ -98,7 +100,8 @@ class _GetServer(_BaseApiClient):
         )
         
         server = Server.model_validate(response.json())
-        self.registry._extract_user_data_from_server(server)
+        if self.registry:
+            self.registry._extract_user_data_from_server(server)
         return server
         
     def _get_bundled_server_sync(self) -> BundledServer:
@@ -109,5 +112,6 @@ class _GetServer(_BaseApiClient):
         )
         
         bundle = BundledServer.model_validate(response.json())
-        self.registry._extract_user_data_from_server(bundle)
+        if self.registry:
+            self.registry._extract_user_data_from_server(bundle)
         return bundle

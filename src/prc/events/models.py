@@ -64,7 +64,10 @@ class Context[T: (Client, AsyncClient)](BaseModel):
             raise TypeError("Client type does not support sending messages.")
         
         user_id = int(self.origin)
-        player = self.client.registry.resolve(user_id) or self.client.get_player_from_user(user_id)
+        if self.client.registry:
+            player = self.client.registry.resolve(user_id) or self.client.get_player_from_user(user_id)
+        else:
+            player = self.client.get_player_from_user(user_id)
         self.client.send_command(cmd.pm(player, message))
     
     async def areply(self, message: str) -> None:
@@ -79,7 +82,10 @@ class Context[T: (Client, AsyncClient)](BaseModel):
             raise TypeError("Client type does not support sending messages.")
         
         user_id = int(self.origin)
-        player = self.client.registry.resolve(user_id) or await self.client.get_player_from_user(user_id)
+        if self.client.registry:
+            player = self.client.registry.resolve(user_id) or await self.client.get_player_from_user(user_id)
+        else:
+            player = await self.client.get_player_from_user(user_id)
         await self.client.send_command(cmd.pm(player, message))
     
     @field_validator("timestamp", mode="before")
