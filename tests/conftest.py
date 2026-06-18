@@ -95,3 +95,106 @@ def v2_payload():
             "ColorName": "Super Red"
         }]
     }
+
+@pytest.fixture 
+def server_payload():
+    return {
+        "Name": "API Test",
+        "OwnerId": 123,
+        "CoOwnerIds": [
+            123
+        ],
+        "CurrentPlayers": 123,
+        "MaxPlayers": 123,
+        "JoinKey": "APIServer",
+        "AccVerifiedReq": "Email",
+        "TeamBalance": True
+    }
+
+@pytest.fixture
+def players_payload():
+    return [
+        {
+            "Player": "PlayerName:123",
+            "Permission": "Server Administrator",
+            "Callsign": "A-123",
+            "Team": "Police"
+        }
+    ]
+
+@pytest.fixture
+def staff_payload():
+    return {
+        "CoOwners": [
+            123
+        ],
+        "Admins": {
+            "54249787": "Black_Hallow",
+            "77573259": "sli_ckk"
+        },
+        "Mods": {
+            "2": "JohnDoe",
+            "3": "JaneDoe"
+        }
+    }
+
+@pytest.fixture
+def join_logs_payload():
+    return [
+        {
+            "Join": True,
+            "Timestamp": 1704614400,
+            "Player": "PlayerName:123"
+        }
+    ]
+
+@pytest.fixture
+def queue_payload():
+    return [123]
+
+@pytest.fixture
+def kill_logs_payload():
+    return [
+        {
+            "Killed": "PlayerName:123",
+            "Killer": "PlayerName:456",
+            "Timestamp": 1704614400
+        }
+    ]
+
+@pytest.fixture
+def command_logs_payload():
+    return [
+        {
+            "Player": "PlayerName:123",
+            "Command": ":h",
+            "Timestamp": 1704614400
+        }
+    ]
+
+@pytest.fixture
+def mod_calls_payload():
+    return [
+        {
+            "Caller": "PlayerName:123",
+            "Moderator": "PlayerName:456",
+            "Timestamp": 1704614400
+        }
+    ]
+
+@pytest.fixture
+def bans_payload():
+    return {
+        "123": "PlayerName",
+        "456": "OtherPlayerName"
+    }
+    
+@pytest.fixture
+def vehicles_payload():
+    return [
+        {
+            "Name": "2019 Falcon Interceptor Utility",
+            "Owner": "flat_bird",
+            "Texture": "Standard"
+        }
+    ]
