@@ -98,9 +98,9 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         
         # rate limit tracking attributes, updated on each request based on response headers
-        self.post_expiration: int = int(time.time())
-        self.get_remaining: int = 0
-        self.get_expiration: int = int(time.time())
+        self._post_expiration: int = int(time.time())
+        self._get_remaining: int = 0
+        self._get_expiration: int = int(time.time())
         
         if self.is_async:
             self.lock = asyncio.Lock()
@@ -139,15 +139,15 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         limit_expiration = headers.get("x-ratelimit-reset")
         
         if resp.request.method == "GET":
-            self.get_remaining = int(limit_remaining) or self.get_remaining
-            self.get_expiration = int(limit_expiration) or self.get_expiration
+            self._get_remaining = int(limit_remaining) or self._get_remaining
+            self._get_expiration = int(limit_expiration) or self._get_expiration
         else:
-            self.post_expiration = int(limit_expiration) or self.post_expiration
+            self._post_expiration = int(limit_expiration) or self._post_expiration
         
         logger.debug("Updated rate limit info.", extra={
-            "get_remaining": self.get_remaining,
-            "get_expiration": self.get_expiration,
-            "post_expiration": self.post_expiration
+            "get_remaining": self._get_remaining,
+            "get_expiration": self._get_expiration,
+            "post_expiration": self._post_expiration
         })
             
     def _get_method(self, endpoint: EndpointType) -> Literal["GET", "POST"]:
@@ -233,12 +233,12 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         return resp
     
     def _get_wait_time(self) -> float:
-        if self.get_remaining > 0:
+        if self._get_remaining > 0:
             return 0.0
-        return max(self.get_expiration - time.time() + 1, 0)
+        return max(self._get_expiration - time.time() + 1, 0)
     
     def _post_wait_time(self) -> float:
-        return max(self.post_expiration - time.time() + 1, 0)
+        return max(self._post_expiration - time.time() + 1, 0)
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):

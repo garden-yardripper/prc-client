@@ -114,8 +114,8 @@ def test_get_bundled_server_sync(payload: dict, respx_mock: respx.MockRouter):
     assert isinstance(server, BundledServer)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
-    assert client.get_remaining == 10
-    assert client.get_expiration == 9999999
+    assert client._get_remaining == 10
+    assert client._get_expiration == 9999999
     
     assert server.name == "API Test"
     assert server.co_owners[0].id == 123
@@ -144,8 +144,8 @@ async def test_get_bundled_server_async(payload: dict, respx_mock: respx.MockRou
     assert isinstance(server, BundledServer)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
-    assert client.get_remaining == 10
-    assert client.get_expiration == 9999999
+    assert client._get_remaining == 10
+    assert client._get_expiration == 9999999
     
     assert server.name == "API Test"
     assert server.co_owners[0].id == 123

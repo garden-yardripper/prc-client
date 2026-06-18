@@ -114,8 +114,8 @@ def test_get_server_sync(respx_mock: respx.MockRouter):
     assert isinstance(server, Server)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
-    assert client.get_remaining == 10
-    assert client.get_expiration == 9999999
+    assert client._get_remaining == 10
+    assert client._get_expiration == 9999999
     
     assert server.name == "API Test"
     assert server.co_owners[0].id == 123
@@ -134,8 +134,8 @@ async def test_get_server_async(respx_mock: respx.MockRouter):
     assert isinstance(server, Server)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
-    assert client.get_remaining == 10
-    assert client.get_expiration == 9999999
+    assert client._get_remaining == 10
+    assert client._get_expiration == 9999999
     
     assert server.name == "API Test"
     assert server.co_owners[0].id == 123
@@ -151,8 +151,8 @@ def test_get_players_sync(respx_mock: respx.MockRouter):
     players_resp = client.get_players()
 
     assert route.called
-    assert client.get_remaining == 9
-    assert client.get_expiration == 9999998
+    assert client._get_remaining == 9
+    assert client._get_expiration == 9999998
     
     assert isinstance(players_resp, list)
     assert isinstance(players_resp[0], Player)
@@ -170,8 +170,8 @@ def test_get_staff_sync(respx_mock: respx.MockRouter):
     staff_resp = client.get_staff()
 
     assert route.called
-    assert client.get_remaining == 8
-    assert client.get_expiration == 9999997
+    assert client._get_remaining == 8
+    assert client._get_expiration == 9999997
     
     assert isinstance(staff_resp, Staff)
     assert staff_resp.admins
@@ -187,8 +187,8 @@ def test_get_join_logs_sync(respx_mock: respx.MockRouter):
     joins = client.get_join_logs()
 
     assert route.called
-    assert client.get_remaining == 7
-    assert client.get_expiration == 9999996
+    assert client._get_remaining == 7
+    assert client._get_expiration == 9999996
     
     assert isinstance(joins, list)
     assert isinstance(joins[0], JoinLog)
@@ -206,8 +206,8 @@ def test_get_queue_sync(respx_mock: respx.MockRouter):
     q = client.get_queue()
 
     assert route.called
-    assert client.get_remaining == 6
-    assert client.get_expiration == 9999995
+    assert client._get_remaining == 6
+    assert client._get_expiration == 9999995
     
     assert isinstance(q, Queue)
     assert isinstance(q.players, list)
@@ -224,8 +224,8 @@ def test_get_kill_logs_sync(respx_mock: respx.MockRouter):
     kills = client.get_kill_logs()
 
     assert route.called
-    assert client.get_remaining == 5
-    assert client.get_expiration == 9999994
+    assert client._get_remaining == 5
+    assert client._get_expiration == 9999994
     
     assert isinstance(kills, list)
     assert isinstance(kills[0], KillLog)
@@ -241,8 +241,8 @@ def test_get_command_logs_sync(respx_mock: respx.MockRouter):
     cmds = client.get_command_logs()
 
     assert route.called
-    assert client.get_remaining == 4
-    assert client.get_expiration == 9999993
+    assert client._get_remaining == 4
+    assert client._get_expiration == 9999993
 
     assert isinstance(cmds, list)
     assert isinstance(cmds[0], CommandLog)
@@ -258,8 +258,8 @@ def test_get_mod_calls_sync(respx_mock: respx.MockRouter):
     calls = client.get_mod_calls()
 
     assert route.called
-    assert client.get_remaining == 3
-    assert client.get_expiration == 9999992
+    assert client._get_remaining == 3
+    assert client._get_expiration == 9999992
     
     assert isinstance(calls, list)
     assert isinstance(calls[0], ModCall)
@@ -276,8 +276,8 @@ def test_get_bans_sync(respx_mock: respx.MockRouter):
     bans_resp = client.get_bans()
 
     assert route.called
-    assert client.get_remaining == 2
-    assert client.get_expiration == 9999991
+    assert client._get_remaining == 2
+    assert client._get_expiration == 9999991
     
     assert isinstance(bans_resp, Bans)
     assert bans_resp.users[0].name == "PlayerName"
@@ -293,8 +293,8 @@ def test_get_vehicles_sync(respx_mock: respx.MockRouter):
     vehicles_resp = client.get_vehicles()
 
     assert route.called
-    assert client.get_remaining == 1
-    assert client.get_expiration == 9999990
+    assert client._get_remaining == 1
+    assert client._get_expiration == 9999990
     
     assert isinstance(vehicles_resp, list)
     assert isinstance(vehicles_resp[0], Vehicle)
