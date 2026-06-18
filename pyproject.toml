@@ -57,7 +57,7 @@ packages = ["src/prc"]
 
 [tool.ruff]
 line-length = 120
-select = ["E", "F"]
+lint.select = ["E", "F"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
