@@ -12,10 +12,14 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v4
 
-      - uses: astral-sh/setup-uv@v6
+      - name: Set up UV
+        uses: astral-sh/setup-uv@v6
 
-      - run: uv build
+      - name: Build
+        run: uv build
 
-      - run: uv publish
+      - name: Publish
+        run: uv publish
