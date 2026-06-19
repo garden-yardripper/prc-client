@@ -5,12 +5,12 @@ from itertools import chain
 
 class UserRegistry:
     def __init__(self):
-        self._by_id: dict[int, FullUser] = {}
-        self._by_username: dict[str, FullUser] = {}
+        self._id_to_name: dict[int, str] = {}
+        self._name_to_id: dict[str, int] = {}
     
     def _add_user(self, user: FullUser):
-        self._by_id[user.id] = user
-        self._by_username[user.name] = user
+        self._id_to_name[user.id] = user.name
+        self._name_to_id[user.name] = user.id
     
     def _extract_user_data_from_server(self, server: Server | BundledServer):
         try:
@@ -81,8 +81,12 @@ class UserRegistry:
             id_search = user
             
         if id_search:
-            return self._by_id.get(id_search)
+            name = self._id_to_name.get(id_search)
+            if name:
+                return FullUser(name, id_search)
         if name_search:
-            return self._by_username.get(name_search)
+            id = self._name_to_id.get(name_search)
+            if id:
+                return FullUser(name_search, id)
         
         return None
