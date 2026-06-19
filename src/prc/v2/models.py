@@ -1,19 +1,9 @@
 import datetime
-from enum import StrEnum
 from typing import Annotated, Literal
 from pydantic import AliasChoices, AliasGenerator, BaseModel, Field, ConfigDict, field_validator
 from pydantic.alias_generators import to_pascal, to_camel
 from ..exceptions import DataNotRequestedError
 from ..users import FullUser, UsernameUser, IdUser
-
-class Endpoint(StrEnum):
-    v2_server = "/v2/server"
-    v2_command = "/v2/server/command"
-    
-    fall_blank_map = "/maps/fall_blank.png"
-    fall_postals_map = "/maps/fall_postals.png"
-    winter_blank_map = "/maps/snow_blank.png"
-    winter_postals_map = "/maps/snow_postals.png"
 
 class MinimalLocation(BaseModel):
     """Represents a location with minimal information.

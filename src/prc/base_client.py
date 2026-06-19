@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Literal, Self, cast, TYPE_CHECKING
 import logging
 import threading
@@ -7,8 +8,6 @@ import httpx
 
 from .policy import CommandPolicy
 from .registry import UserRegistry
-from .v2.models import Endpoint as V2Endpoint
-from .v1.models import Endpoint as V1Endpoint
 from .exceptions import ApiError, RateLimited, DeserializationError
 
 if TYPE_CHECKING:
@@ -19,7 +18,27 @@ logger = logging.getLogger(__name__)
 
 type ClientType = "V2AsyncClient | V2Client | V1AsyncClient | V1Client"
 type HTTPXClient = httpx.Client | httpx.AsyncClient
-type EndpointType = V1Endpoint | V2Endpoint
+
+class _Endpoint(StrEnum):
+    v1_server = "/v1/server"
+    v1_players = "/v1/server/players"
+    v1_staff = "/v1/server/staff"
+    v1_join_logs = "/v1/server/joinlogs"
+    v1_queue = "/v1/server/queue"
+    v1_kill_logs = "/v1/server/killlogs"
+    v1_command_logs = "/v1/server/commandlogs"
+    v1_mod_calls = "/v1/server/modcalls"
+    v1_bans = "/v1/server/bans"
+    v1_vehicles = "/v1/server/vehicles"
+    v1_command = "/v1/server/command"
+    
+    v2_server = "/v2/server"
+    v2_command = "/v2/server/command"
+    
+    fall_blank_map = "/maps/fall_blank.png"
+    fall_postals_map = "/maps/fall_postals.png"
+    winter_blank_map = "/maps/snow_blank.png"
+    winter_postals_map = "/maps/snow_postals.png"
 
 def create_async_client(server_key: str, **kwargs) -> httpx.AsyncClient:
     logger.debug("Creating new async HTTPX client.")
@@ -154,13 +173,13 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             "post_expiration": self._post_expiration
         })
             
-    def _get_method(self, endpoint: EndpointType) -> Literal["GET", "POST"]:
-        if isinstance(endpoint, V2Endpoint):
-            return "GET" if endpoint == V2Endpoint.v2_server else "POST"
+    def _get_method(self, endpoint: _Endpoint) -> Literal["GET", "POST"]:
+        if endpoint == _Endpoint.v2_command or endpoint == _Endpoint.v1_command:
+            return "POST"
         else:
-            return "POST" if endpoint == V1Endpoint.command else "GET"
+            return "GET"
         
-    async def _send_async_request(self, endpoint: EndpointType, **kwargs) -> httpx.Response:
+    async def _send_async_request(self, endpoint: _Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             logger.error("Attempted to send async request with closed connection.")
             raise RuntimeError("Unable to make request as this connection is closed.")
@@ -198,7 +217,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             
         return resp
     
-    def _send_sync_request(self, endpoint: EndpointType, **kwargs) -> httpx.Response:
+    def _send_sync_request(self, endpoint: _Endpoint, **kwargs) -> httpx.Response:
         if self.connection is None and self.closed:
             logger.error("Attempted to send sync request with closed connection.")
             raise RuntimeError("Unable to make request as this connection is closed.")

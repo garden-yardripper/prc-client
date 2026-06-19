@@ -1,22 +1,8 @@
 import datetime
-from enum import StrEnum
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from pydantic.alias_generators import to_pascal
 from ..users import FullUser, UsernameUser, IdUser
-
-class Endpoint(StrEnum):
-    server = "/v1/server"
-    players = "/v1/server/players"
-    staff = "/v1/server/staff"
-    join_logs = "/v1/server/joinlogs"
-    queue = "/v1/server/queue"
-    kill_logs = "/v1/server/killlogs"
-    command_logs = "/v1/server/commandlogs"
-    mod_calls = "/v1/server/modcalls"
-    bans = "/v1/server/bans"
-    vehicles = "/v1/server/vehicles"
-    command = "/v1/server/command"
 
 class Vehicle(BaseModel):
     """Represents an in-game vehicle.
