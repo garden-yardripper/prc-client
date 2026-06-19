@@ -1,4 +1,4 @@
-name: Run Ruff Linter
+name: Ruff Lint
 
 on:
   push:
@@ -15,6 +15,10 @@ jobs:
 
       - name: Set up UV
         uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: |
+          uv tool install ruff@latest
 
       - name: Run Ruff Linter
         run: uv run ruff check .
