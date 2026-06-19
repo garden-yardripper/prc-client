@@ -1,6 +1,6 @@
 import logging
-from ..base_client import _BaseApiClient
-from .models import Endpoint, Server, BundledServer
+from ..base_client import _BaseApiClient, _Endpoint
+from .models import Server, BundledServer
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class _GetServer(_BaseApiClient):
         logger.info("Fetching server data with params", extra=params)
         
         response = await self._send_async_request(
-            endpoint=Endpoint.v2_server,
+            endpoint=_Endpoint.v2_server,
             params=params
         )
         
@@ -59,7 +59,7 @@ class _GetServer(_BaseApiClient):
     async def _get_bundled_server_async(self) -> BundledServer:
         logger.info("Fetching bundled server data.")
         response = await self._send_async_request(
-            endpoint=Endpoint.v2_server,
+            endpoint=_Endpoint.v2_server,
             params=ALL_DATA_PARAMS
         )
         
@@ -95,7 +95,7 @@ class _GetServer(_BaseApiClient):
         logger.info("Fetching server data with params", extra=params)
         
         response = self._send_sync_request(
-            endpoint=Endpoint.v2_server,
+            endpoint=_Endpoint.v2_server,
             params=params
         )
         
@@ -107,7 +107,7 @@ class _GetServer(_BaseApiClient):
     def _get_bundled_server_sync(self) -> BundledServer:
         logger.info("Fetching bundled server data.")
         response = self._send_sync_request(
-            endpoint=Endpoint.v2_server,
+            endpoint=_Endpoint.v2_server,
             params=ALL_DATA_PARAMS
         )
         

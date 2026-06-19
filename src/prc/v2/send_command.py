@@ -1,8 +1,7 @@
 import logging
 from typing import TYPE_CHECKING
 from httpx import Response
-from .models import Endpoint
-from ..base_client import _BaseApiClient
+from ..base_client import _BaseApiClient, _Endpoint
 
 if TYPE_CHECKING:
     from ..command import CommandLike
@@ -16,7 +15,7 @@ class _SendCommand(_BaseApiClient):
         logger.info("Sending command: %s", cmd)
         
         return await self._send_async_request(
-            endpoint=Endpoint.v2_command,
+            endpoint=_Endpoint.v2_command,
             json={"command": normalize_command(cmd)}
         )
         
@@ -26,6 +25,6 @@ class _SendCommand(_BaseApiClient):
         logger.info("Sending command: %s", cmd)
         
         return self._send_sync_request(
-            endpoint=Endpoint.v2_command,
+            endpoint=_Endpoint.v2_command,
             json={"command": normalize_command(cmd)}
         )
