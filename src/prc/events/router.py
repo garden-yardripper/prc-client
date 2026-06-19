@@ -127,8 +127,8 @@ class Router:
         sighex_bytes = binascii.unhexlify(sighex)
         
         try:
-            logger.info("Request signature is VALID.")
             self._public_key.verify(sighex_bytes, message)
+            logger.info("Request signature is VALID.")
             return True
         except InvalidSignature:
             logger.info("Request signature is INVALID.")
