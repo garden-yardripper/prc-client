@@ -24,14 +24,16 @@ def _get_player_in_server_from_user(server: Server, user: "AnyUserType", partial
     else:
         if isinstance(user, int):
             id_search = user
-        else:
+        elif isinstance(user, str):
             name_search = user
+        else:
+            name_search = str(user)
         
     for player in server.players:
         if partial_match:
-            if id_search is not None and player.user.id == id_search:
-                return player
-            if name_search is not None and player.user.name == name_search:
+            if (id_search is not None and player.user.id == id_search) or (
+                name_search is not None and player.user.name.lower().startswith(name_search.lower())
+            ):
                 return player
         else:
             if (id_search is not None and player.user.id == id_search) or (
@@ -109,7 +111,7 @@ class AsyncClient(_GetServer, _SendCommand):
             An optional server to search for the player in.
             If you already have a `Server` object, you can pass it here to save an additional API call.
         partial_match: `bool` (optional)
-            Whether to allow partial matches on usernames. Defaults to `False`.
+            Whether to allow partial matches on usernames (player name starts with username). Defaults to `False`.
         
         Raises
         ------
@@ -219,7 +221,7 @@ class Client(_GetServer, _SendCommand):
             An optional server to search for the player in.
             If you already have a `Server` object, you can pass it here to save an additional API call.
         partial_match: `bool` (optional)
-            Whether to allow partial matches on usernames. Defaults to `False`.
+            Whether to allow partial matches on usernames (player name starts with username). Defaults to `False`.
         
         Raises
         ------
