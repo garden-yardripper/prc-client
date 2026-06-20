@@ -10,7 +10,11 @@ from .send_command import _SendCommand
 if TYPE_CHECKING:
     from ..command import AnyUserType, CommandLike
 
-def _get_player_in_server_from_user(server: Server, user: "AnyUserType", partial_match: bool) -> Player:
+def _get_player_in_server_from_user(
+    server: Server | BundledServer,
+    user: "AnyUserType",
+    partial_match: bool
+) -> Player:
     if isinstance(user, Player):
         return user
     
@@ -95,7 +99,7 @@ class AsyncClient(_GetServer, _SendCommand):
     async def get_player_from_user(
         self,
         user: "AnyUserType",
-        server: Server | None = None,
+        server: Server | BundledServer | None = None,
         *,
         partial_match: bool = False
     ) -> Player:
@@ -205,7 +209,7 @@ class Client(_GetServer, _SendCommand):
     def get_player_from_user(
         self,
         user: "AnyUserType",
-        server: Server | None = None,
+        server: Server | BundledServer | None = None,
         *,
         partial_match: bool = False
     ) -> Player:
