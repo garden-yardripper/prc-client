@@ -289,7 +289,7 @@ class Player(BaseModel):
     callsign: Annotated[str | None, Field(default=None)]
     location: Location
     permission: Literal["Normal", "Server Administrator", "Server Owner", "Server Moderator"]
-    wanted_stars: int
+    wanted_stars: float
     
     model_config = ConfigDict(alias_generator=to_pascal, populate_by_name=True, frozen=True)
     
