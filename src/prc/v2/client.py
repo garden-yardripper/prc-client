@@ -111,7 +111,7 @@ class AsyncClient(_GetServer, _SendCommand):
         ----------
         user: `AnyUserType`
             The user to get the player from.
-        server: `Server` | `None` (optional)
+        server: `Server` | `BundledServer` | `None` (optional)
             An optional server to search for the player in.
             If you already have a `Server` object, you can pass it here to save an additional API call.
         partial_match: `bool` (optional)
@@ -221,7 +221,7 @@ class Client(_GetServer, _SendCommand):
         ----------
         user: `AnyUserType`
             The user to get the player from.
-        server: `Server` | `None` (optional)
+        server: `Server` | `BundledServer` | `None` (optional)
             An optional server to search for the player in.
             If you already have a `Server` object, you can pass it here to save an additional API call.
         partial_match: `bool` (optional)
