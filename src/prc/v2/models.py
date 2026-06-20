@@ -382,55 +382,55 @@ class Server(_ServerBase):
     
     @property
     def players(self) -> list[Player]:
-        if not self.zzz_players:
+        if self.zzz_players is None:
             raise DataNotRequestedError("Player data not requested.")
         return [Player.model_validate(player_dict) for player_dict in self.zzz_players]
     
     @property
     def staff(self) -> Staff:
-        if not self.zzz_staff:
+        if self.zzz_staff is None:
             raise DataNotRequestedError("Staff data not requested.")
         return Staff.model_validate(self.zzz_staff)
     
     @property
     def join_logs(self) -> list[JoinLog]:
-        if not self.zzz_join_logs:
+        if self.zzz_join_logs is None:
             raise DataNotRequestedError("Join log data not requested.")
         return [JoinLog.model_validate(log_dict) for log_dict in self.zzz_join_logs]
     
     @property
     def queue(self) -> Queue:
-        if not self.zzz_queue:
+        if self.zzz_queue is None:
             raise DataNotRequestedError("Queue data not requested.")
         return Queue.model_validate(self.zzz_queue)
     
     @property
     def kill_logs(self) -> list[KillLog]:
-        if not self.zzz_kill_logs:
+        if self.zzz_kill_logs is None:
             raise DataNotRequestedError("Kill log data not requested.")
         return [KillLog.model_validate(log_dict) for log_dict in self.zzz_kill_logs]
     
     @property
     def command_logs(self) -> list[CommandLog]:
-        if not self.zzz_command_logs:
+        if self.zzz_command_logs is None:
             raise DataNotRequestedError("Command log data not requested.")
         return [CommandLog.model_validate(log_dict) for log_dict in self.zzz_command_logs]
     
     @property
     def mod_calls(self) -> list[ModCall]:
-        if not self.zzz_mod_calls:
+        if self.zzz_mod_calls is None:
             raise DataNotRequestedError("Mod call data not requested.")
         return [ModCall.model_validate(mod_call_dict) for mod_call_dict in self.zzz_mod_calls]
     
     @property
     def emergency_calls(self) -> list[EmergencyCall]:
-        if not self.zzz_emergency_calls:
+        if self.zzz_emergency_calls is None:
             raise DataNotRequestedError("Emergency call data not requested.")
         return [EmergencyCall.model_validate(emergency_call_dict) for emergency_call_dict in self.zzz_emergency_calls]
     
     @property
     def vehicles(self) -> list[Vehicle]:
-        if not self.zzz_vehicles:
+        if self.zzz_vehicles is None:
             raise DataNotRequestedError("Vehicle data not requested.")
         return [Vehicle.model_validate(vehicle_dict) for vehicle_dict in self.zzz_vehicles]
 
