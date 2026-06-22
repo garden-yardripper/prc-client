@@ -2,7 +2,7 @@
 
 from . import v1, v2, utils, exceptions
 from .users import FullUser, UsernameUser, IdUser
-from .command import cmd
+from .command import cmd, Command
 from .policy import CommandPolicy
 from .logs import JoinLog, KillLog, CommandLog, ModCall
 
@@ -10,7 +10,7 @@ __all__ = [
     "v1", "v2", "utils", "exceptions",
     "FullUser", "UsernameUser", "IdUser",
     "JoinLog", "KillLog", "CommandLog", "ModCall",
-    "cmd", "CommandPolicy"
+    "cmd", "Command", "CommandPolicy"
 ]
 
 import logging
