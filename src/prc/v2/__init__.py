@@ -6,10 +6,6 @@ from .models import (
     Location,
     Vehicle,
     EmergencyCall,
-    JoinLog,
-    KillLog,
-    CommandLog,
-    ModCall,
     Queue,
     Staff,
     Player,
@@ -19,7 +15,6 @@ from .models import (
 
 __all__ = [
     "Client", "AsyncClient", "MinimalLocation", 
-    "Location", "Vehicle", "EmergencyCall", "JoinLog",
-    "KillLog", "CommandLog", "ModCall", "Queue",
+    "Location", "Vehicle", "EmergencyCall", "Queue",
     "Staff", "Player", "Server", "BundledServer"
 ]
