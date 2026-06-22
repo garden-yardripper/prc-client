@@ -4,9 +4,7 @@ import httpx
 import pytest
 import datetime
 import respx
-from prc.exceptions import ApiError, RateLimited
-from prc.v2.client import AsyncClient, Client
-from prc.v2.models import BundledServer
+import prc
 
 @respx.mock
 def test_get_bundled_server_sync(v2_payload: dict, respx_mock: respx.MockRouter):
@@ -15,11 +13,11 @@ def test_get_bundled_server_sync(v2_payload: dict, respx_mock: respx.MockRouter)
         json=v2_payload
     )
     
-    client = Client("server-key")
+    client = prc.v2.Client("server-key")
     server = client.get_bundled_server()
     
     assert route.called
-    assert isinstance(server, BundledServer)
+    assert isinstance(server, prc.v2.BundledServer)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
     assert client._get_remaining == 10
@@ -45,11 +43,11 @@ async def test_get_bundled_server_async(v2_payload: dict, respx_mock: respx.Mock
         json=v2_payload
     )
     
-    client = AsyncClient("server-key")
+    client = prc.v2.AsyncClient("server-key")
     server = await client.get_bundled_server()
     
     assert route.called
-    assert isinstance(server, BundledServer)
+    assert isinstance(server, prc.v2.BundledServer)
     assert route.calls[0].request.headers["server-key"] == "server-key"
     
     assert client._get_remaining == 10
@@ -69,14 +67,14 @@ async def test_get_bundled_server_async(v2_payload: dict, respx_mock: respx.Mock
     assert server.queue.length == 1
 
 def test_raise_for_status():
-    client = Client("server-key")
+    client = prc.v2.Client("server-key")
     
     ratelimit_body = {"code": 429, "message": "rate limited", "retry_after": 1}
     ratelimit_resp = httpx.Response(429, content=json.dumps(ratelimit_body).encode("utf-8"))
-    with pytest.raises(RateLimited):
+    with pytest.raises(prc.exceptions.RateLimited):
         client._raise_for_status(ratelimit_resp)
         
     error_body = {"code": 500, "message": "random error"}
-    error_resp = httpx.Response(429, content=json.dumps(error_body).encode("utf-8"))
-    with pytest.raises(ApiError):
+    error_resp = httpx.Response(500, content=json.dumps(error_body).encode("utf-8"))
+    with pytest.raises(prc.exceptions.ApiError):
         client._raise_for_status(error_resp)

@@ -1,10 +1,9 @@
 import respx
-from prc.users import IdUser
-from prc.v1 import Client, AsyncClient
-from prc.v1.models import (
-    Server, Player, Staff, JoinLog,
-    Queue, KillLog, CommandLog,
-    ModCall, Bans, Vehicle
+from prc import JoinLog, KillLog, CommandLog, ModCall, IdUser
+from prc.v1 import (
+    Client, AsyncClient,
+    Server, Player, Staff,
+    Queue, Bans, Vehicle
 )
 
 @respx.mock

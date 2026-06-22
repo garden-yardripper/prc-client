@@ -1,9 +1,8 @@
 import respx
-from prc.users import FullUser, UsernameUser
-from prc.v2.models import BundledServer, Server
-from prc.v1.models import Player as V1Player
-from prc.v2.client import Client
-from prc.v1.client import Client as V1Client
+import prc
+from prc import FullUser, UsernameUser
+from prc.v2 import BundledServer, Server
+from prc.v1 import Player as V1Player
 
 def server_staff():
     return {
@@ -32,7 +31,7 @@ def test_user_registry_on_bundle(v2_payload: dict, respx_mock: respx.MockRouter)
         json=v2_payload
     )
     
-    client = Client("server-key")
+    client = prc.v2.Client("server-key")
     server = client.get_bundled_server()
     
     assert route.called
@@ -59,7 +58,7 @@ def test_user_registry_on_server(respx_mock: respx.MockRouter):
         json=server_staff()
     )
     
-    client = Client("server-key")
+    client = prc.v2.Client("server-key")
     server = client.get_server(staff=True)
     
     assert route.called
@@ -81,7 +80,7 @@ def test_user_registry_on_v1(players_payload, respx_mock: respx.MockRouter):
         json=players_payload
     )
     
-    client = V1Client("server-key")
+    client = prc.v1.Client("server-key")
     players = client.get_players()
     
     assert route.called
