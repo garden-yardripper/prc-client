@@ -118,7 +118,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         
-        self.registry = UserRegistry() if use_registry else None
+        self._registry = UserRegistry() if use_registry else None
         
         # rate limit tracking attributes, updated on each request based on response headers
         self._post_expiration: int = int(time.time())
@@ -262,6 +262,13 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     
     def _post_wait_time(self) -> float:
         return max(self._post_expiration - time.time() + 1, 0)
+    
+    @property
+    def registry(self) -> UserRegistry:
+        if self._registry is None:
+            logger.error("Attempted to access user registry while disabled.")
+            raise RuntimeError("User registry is not enabled for this client.")
+        return self._registry
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
