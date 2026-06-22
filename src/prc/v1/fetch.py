@@ -1,15 +1,12 @@
 from itertools import chain
 import logging
 from ..base_client import _BaseApiClient, _Endpoint
+from ..logs import JoinLog, KillLog, CommandLog, ModCall
 from .models import (
-    JoinLog,
     Player,
     Server,
     Staff,
     Queue,
-    KillLog,
-    CommandLog,
-    ModCall,
     Bans,
     Vehicle
 )
