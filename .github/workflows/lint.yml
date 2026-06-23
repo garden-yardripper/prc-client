@@ -28,7 +28,7 @@ jobs:
         id: install-deps
         run: |
           python -m pip install --upgrade pip
-          pip install .
+          pip install .[dev,events,fastapi,starlette,quart]
           pip install ruff
 
       - name: Run Pyright
