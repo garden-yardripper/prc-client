@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -29,8 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install .[events,fastapi,starlette,quart]
-          pip install pytest pytest-asyncio respx
-          pip install ruff
+          pip install pytest pytest-asyncio respx ruff
 
       - name: Run Pyright
         uses: jakebailey/pyright-action@v1
