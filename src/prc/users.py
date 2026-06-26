@@ -20,7 +20,7 @@ class UsernameUser:
     """
     name: str
     
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 @dataclass(frozen=True)
@@ -34,10 +34,10 @@ class IdUser:
     """
     id: int
     
-    def __int__(self):
+    def __int__(self) -> int:
         return self.id
     
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.id)
 
 @dataclass(frozen=True)
@@ -59,8 +59,8 @@ class FullUser:
         name, id = delimited.split(":", maxsplit=1)
         return cls(name=name, id=int(id))
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name}:{self.id}"
     
-    def __int__(self):
-        return int(self.id)
+    def __int__(self) -> int:
+        return self.id

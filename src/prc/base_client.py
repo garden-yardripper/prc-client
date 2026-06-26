@@ -118,7 +118,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         
-        self._registry = UserRegistry() if use_registry else None
+        self._registry: UserRegistry | None = UserRegistry() if use_registry else None
         
         # rate limit tracking attributes, updated on each request based on response headers
         self._post_expiration: int = int(time.time())
@@ -126,9 +126,9 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self._get_expiration: int = int(time.time())
         
         if self.is_async:
-            self.lock = asyncio.Lock()
+            self.lock: asyncio.Lock | threading.Lock = asyncio.Lock()
         else:
-            self.lock = threading.Lock()
+            self.lock: asyncio.Lock | threading.Lock = threading.Lock()
     
     def _raise_for_status(self, resp: httpx.Response):
         body = resp.json()

@@ -4,15 +4,15 @@ from .exceptions import DataNotRequestedError
 from itertools import chain
 
 class UserRegistry:
-    def __init__(self):
+    def __init__(self) -> None:
         self._id_to_name: dict[int, str] = {}
         self._name_to_id: dict[str, int] = {}
     
-    def _add_user(self, user: FullUser):
+    def _add_user(self, user: FullUser) -> None:
         self._id_to_name[user.id] = user.name
         self._name_to_id[user.name] = user.id
     
-    def _extract_user_data_from_server(self, server: Server | BundledServer):
+    def _extract_user_data_from_server(self, server: Server | BundledServer) -> None:
         try:
             for player in server.players:
                 self._add_user(player.user)

@@ -52,7 +52,7 @@ class _GetServer(_BaseApiClient):
         )
         
         server = Server.model_validate(response.json())
-        if self.registry:
+        if self.registry is not None:
             self.registry._extract_user_data_from_server(server)
         return server
     
@@ -64,7 +64,7 @@ class _GetServer(_BaseApiClient):
         )
         
         bundle = BundledServer.model_validate(response.json())
-        if self.registry:
+        if self.registry is not None:
             self.registry._extract_user_data_from_server(bundle)
         return bundle
     
@@ -100,7 +100,7 @@ class _GetServer(_BaseApiClient):
         )
         
         server = Server.model_validate(response.json())
-        if self.registry:
+        if self.registry is not None:
             self.registry._extract_user_data_from_server(server)
         return server
         
@@ -112,6 +112,6 @@ class _GetServer(_BaseApiClient):
         )
         
         bundle = BundledServer.model_validate(response.json())
-        if self.registry:
+        if self.registry is not None:
             self.registry._extract_user_data_from_server(bundle)
         return bundle

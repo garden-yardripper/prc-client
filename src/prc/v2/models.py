@@ -131,7 +131,7 @@ class EmergencyCall(BaseModel):
     @field_validator("position", mode="before")
     def position_to_minimal_location(cls, v):
         if isinstance(v, list) and len(v) == 2:
-            return MinimalLocation(x=v[0], z=v[1])
+            return MinimalLocation(LocationX=v[0], LocationZ=v[1])
         return v
     
     @field_validator("started_at", mode="before")

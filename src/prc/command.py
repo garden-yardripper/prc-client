@@ -47,7 +47,7 @@ class Command:
     def __post_init__(self) -> None:
         self.text = normalize_command(self.text)
     
-    async def asend(self, client: "V2AsyncClient"):
+    async def asend(self, client: "V2AsyncClient") -> Response:
         """Sends this command to the API using the provided asynchronous client."""
         logger.info("Sending async command: '%s'", self.text)
         return await client.send_command(self)
