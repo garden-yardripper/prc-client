@@ -201,7 +201,7 @@ class Player(BaseModel):
         The player's current location.
     permission: `Literal["Normal", "Server Administrator", "Server Owner", "Server Moderator"]`
         The player's permission level.
-    wanted_stars: `int`
+    wanted_stars: `float`
         The number of wanted stars the player has.
     """
     team: str
