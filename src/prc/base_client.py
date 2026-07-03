@@ -1,3 +1,4 @@
+from typing import overload
 from enum import StrEnum
 from typing import Literal, Self, cast, TYPE_CHECKING
 import logging
@@ -40,9 +41,9 @@ class _Endpoint(StrEnum):
     winter_blank_map = "/maps/snow_blank.png"
     winter_postals_map = "/maps/snow_postals.png"
 
-def create_async_client(server_key: str, global_key: str | None = None, **kwargs) -> httpx.AsyncClient:
+def create_async_client(server_key: str | None, global_key: str | None, **kwargs) -> httpx.AsyncClient:
     logger.debug("Creating new async HTTPX client.")
-    headers = {"server-key": server_key}
+    headers = {"server-key": server_key or "..."}
     if global_key is not None:
         headers["Authorization"] = global_key
     
@@ -52,9 +53,9 @@ def create_async_client(server_key: str, global_key: str | None = None, **kwargs
         **kwargs
     )
     
-def create_sync_client(server_key: str, global_key: str | None = None, **kwargs) -> httpx.Client:
+def create_sync_client(server_key: str | None, global_key: str | None, **kwargs) -> httpx.Client:
     logger.debug("Creating new sync HTTPX client.")
-    headers = {"server-key": server_key}
+    headers = {"server-key": server_key or "..."}
     if global_key is not None:
         headers["Authorization"] = global_key
     
@@ -65,7 +66,7 @@ def create_sync_client(server_key: str, global_key: str | None = None, **kwargs)
     )
 
 class _AsyncContext:
-    server_key: str
+    server_key: str | None
     global_key: str | None
     connection: HTTPXClient | None
 
@@ -81,7 +82,7 @@ class _AsyncContext:
         self.closed = True
 
 class _SyncContext:
-    server_key: str
+    server_key: str | None
     global_key: str | None
     connection: HTTPXClient | None
 
@@ -97,8 +98,34 @@ class _SyncContext:
         self.closed = True
 
 class _BaseApiClient(_SyncContext, _AsyncContext):
+    @overload
+    def __init__(self,
+        server_key: None = None,
+        *,
+        global_key: str,
+        app_id: int,
+        policy: CommandPolicy | None = None,
+        use_registry: bool = True,
+        wait_for_rate_limit: bool = True,
+        connection: HTTPXClient | None = None
+    ):
+        ...
+        
+    @overload
     def __init__(self,
         server_key: str,
+        *,
+        global_key: None = None,
+        app_id: None = None,
+        policy: CommandPolicy | None = None,
+        use_registry: bool = True,
+        wait_for_rate_limit: bool = True,
+        connection: HTTPXClient | None = None
+    ):
+        ...
+    
+    def __init__(self,
+        server_key: str | None = None,
         *,
         global_key: str | None = None,
         app_id: int | None = None,
@@ -133,9 +160,9 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         from .v2.client import AsyncClient as V2AsyncClient
         from .v1.client import AsyncClient as V1AsyncClient
         
-        self.server_key: str = server_key
+        self.server_key: str | None = server_key
         self.global_key: str | None = global_key
-        self.app_id: int | None = None
+        self.app_id: int | None = app_id
         self.policy = policy
         self.wait_for_rate_limit = wait_for_rate_limit
         self.connection: HTTPXClient | None = connection
@@ -293,6 +320,16 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             logger.error("Attempted to access user registry while disabled.")
             raise RuntimeError("User registry is not enabled for this client.")
         return self._registry
+    
+    def create_auth_link(self, server_key: str) -> str:
+        """Create an authorization link from the specified **full** server key.
+        
+        This link grants your public application permission to run commands on the user's server
+        once accepted by the user.
+        
+        Your application should not store the user's server key anywhere; you will have
+        the required permissions to run commands using only your `global_key` once the user accepts."""
+        ...
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
