@@ -166,8 +166,10 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.policy = policy
         self.wait_for_rate_limit = wait_for_rate_limit
         self.connection: HTTPXClient | None = connection
+        
         self.closed: bool = False
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
+        self.is_public: bool = self.server_key is None
         
         self._registry: UserRegistry | None = UserRegistry() if use_registry else None
         
@@ -321,7 +323,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("User registry is not enabled for this client.")
         return self._registry
     
-    def create_auth_link(self, server_key: str) -> str:
+    def generate_auth_link(self, server_key: str) -> str:
         """Create an authorization link from the specified **full** server key.
         
         This link grants your public application permission to run commands on the user's server
@@ -329,7 +331,16 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         Your application should not store the user's server key anywhere; you will have
         the required permissions to run commands using only your `global_key` once the user accepts."""
-        ...
+        
+        if not self.global_key or not self.app_id:
+            raise RuntimeError("Client is not a public application.")
+        
+        try:
+            private, server_id = server_key.split("-", maxsplit=1)
+        except ValueError:
+            raise ValueError("Invalid server key provided to create_auth_link.")
+        
+        return f"https://api.erlc.gg/server-owners/server/{server_id}/authorize/{self.app_id}"
     
     async def aclose(self):
         if not isinstance(self.connection, httpx.AsyncClient):
