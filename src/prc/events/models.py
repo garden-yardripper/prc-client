@@ -64,7 +64,7 @@ class Context[T: (Client, AsyncClient)](BaseModel):
             raise TypeError("Client type does not support sending messages.")
         
         user_id = int(self.origin)
-        if self.client.registry:
+        if self.client.registry is not None:
             player = self.client.registry.resolve(user_id) or self.client.get_player_from_user(user_id)
         else:
             player = self.client.get_player_from_user(user_id)
@@ -82,7 +82,7 @@ class Context[T: (Client, AsyncClient)](BaseModel):
             raise TypeError("Client type does not support sending messages.")
         
         user_id = int(self.origin)
-        if self.client.registry:
+        if self.client.registry is not None:
             player = self.client.registry.resolve(user_id) or await self.client.get_player_from_user(user_id)
         else:
             player = await self.client.get_player_from_user(user_id)
@@ -100,8 +100,8 @@ class Context[T: (Client, AsyncClient)](BaseModel):
         return self._client
     
     @property
-    def b64_server(self) -> str:
-        """`str`: The mysterious Base64 server associated with this event."""
+    def server_id(self) -> str:
+        """`str`: The Base64 server ID associated with this event."""
         return self._b64_server
     
     @property
@@ -140,7 +140,7 @@ class EventBatch(BaseModel):
     contexts: `list[Context]`
         The list of event contexts in the batch.
     server: `str`
-        The server to which the events belong (Base64 string).
+        The server ID to which the events belong (Base64 string).
     """
     events: list[Context]
     server: str
