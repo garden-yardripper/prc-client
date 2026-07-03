@@ -40,28 +40,37 @@ class _Endpoint(StrEnum):
     winter_blank_map = "/maps/snow_blank.png"
     winter_postals_map = "/maps/snow_postals.png"
 
-def create_async_client(server_key: str, **kwargs) -> httpx.AsyncClient:
+def create_async_client(server_key: str, global_key: str | None = None, **kwargs) -> httpx.AsyncClient:
     logger.debug("Creating new async HTTPX client.")
+    headers = {"server-key": server_key}
+    if global_key is not None:
+        headers["Authorization"] = global_key
+    
     return httpx.AsyncClient(
         base_url="https://api.erlc.gg/",
-        headers={"server-key": server_key},
+        headers=headers,
         **kwargs
     )
     
-def create_sync_client(server_key: str, **kwargs) -> httpx.Client:
+def create_sync_client(server_key: str, global_key: str | None = None, **kwargs) -> httpx.Client:
     logger.debug("Creating new sync HTTPX client.")
+    headers = {"server-key": server_key}
+    if global_key is not None:
+        headers["Authorization"] = global_key
+    
     return httpx.Client(
         base_url="https://api.erlc.gg/",
-        headers={"server-key": server_key},
+        headers=headers,
         **kwargs
     )
 
 class _AsyncContext:
     server_key: str
+    global_key: str | None
     connection: HTTPXClient | None
 
     async def __aenter__(self) -> Self:
-        self.connection = create_async_client(self.server_key)
+        self.connection = create_async_client(self.server_key, self.global_key)
         return self
     
     async def __aexit__(self, exc_type, exc, tb):
@@ -73,10 +82,11 @@ class _AsyncContext:
 
 class _SyncContext:
     server_key: str
+    global_key: str | None
     connection: HTTPXClient | None
 
     def __enter__(self) -> Self:
-        self.connection = create_sync_client(self.server_key)
+        self.connection = create_sync_client(self.server_key, self.global_key)
         return self
     
     def __exit__(self, exc_type, exc, tb):
@@ -90,6 +100,8 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def __init__(self,
         server_key: str,
         *,
+        global_key: str | None = None,
+        app_id: int | None = None,
         policy: CommandPolicy | None = None,
         use_registry: bool = True,
         wait_for_rate_limit: bool = True,
@@ -100,10 +112,20 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         ----------
         server_key: `str`
             The private server API key.
+        global_key: `str` | `None` (optional)
+            Your public application's global API key. 
+            Only required for [public applications](https://apidocs.erlc.gg/creating-public-applications).
+        app_id: `str` | `None` (optional)
+            Your public application's ID.
+            Only required for [public applications](https://apidocs.erlc.gg/creating-public-applications).
         policy: `CommandPolicy` | `None` (optional)
             The optional command policy to use to validate commands. Raises `CommandPolicyViolation` on violations.
-        rate_limit_config: `RateLimitConfig` (optional)
-            The rate limit configuration for this client. Defaults to safe values.
+        use_registry: `bool` (optional)
+            Whether to use the user registry to store full users and retrieve them when needed.
+            Recommended to save API requests. Defaults to `True`.
+        wait_for_rate_limit: `bool` (optional)
+            Whether to track rate limits and wait until expiration to make requests.
+            Defaults to `True`.
         connection: `HTTPXClient` | `None` (optional)
             An existing HTTPX client to use. If not provided, a new one will be created.
         """
@@ -112,6 +134,8 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         from .v1.client import AsyncClient as V1AsyncClient
         
         self.server_key: str = server_key
+        self.global_key: str | None = global_key
+        self.app_id: int | None = None
         self.policy = policy
         self.wait_for_rate_limit = wait_for_rate_limit
         self.connection: HTTPXClient | None = connection
@@ -185,7 +209,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
             logger.debug("No existing connection found; creating new async client for request.")
-            self.connection = create_async_client(self.server_key)
+            self.connection = create_async_client(self.server_key, self.global_key)
         if not isinstance(self.connection, httpx.AsyncClient):
             logger.error("Async request attempted with non-async client.")
             raise RuntimeError("Cannot send async request; connection is not an async client.")
@@ -223,7 +247,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
             raise RuntimeError("Unable to make request as this connection is closed.")
         if self.connection is None:
             logger.debug("No existing connection found; creating new sync client for request.")
-            self.connection = create_sync_client(self.server_key)
+            self.connection = create_sync_client(self.server_key, self.global_key)
         if not isinstance(self.connection, httpx.Client):
             logger.error("Sync request attempted with non-sync client.")
             raise RuntimeError("Cannot send sync request; connection is not a sync client.")
