@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING, Literal
-from ..router import Router
 
 if TYPE_CHECKING:
+    from ..router import Router
     from fastapi import Request, BackgroundTasks
 
 class _FastApiIntegration:
-    def __init__(self, router: Router) -> None:
+    def __init__(self, router: "Router") -> None:
         self.router = router
     
     async def handle_fastapi_request(self,

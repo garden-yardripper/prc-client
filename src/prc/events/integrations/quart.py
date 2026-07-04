@@ -12,10 +12,7 @@ class _QuartIntegration:
         try:
             from quart import request
         except ImportError:
-            raise RuntimeError((
-                "Quart integration for PRC events requires the `quart` library. "
-                "Install the dependency with `pip install prc-client[quart]`."
-            ))
+            raise RuntimeError("Quart integration for PRC events requires the `quart` library.")
         
         raw_body = await request.get_data(as_text=False)
         raw_body = raw_body.encode() if isinstance(raw_body, str) else raw_body
