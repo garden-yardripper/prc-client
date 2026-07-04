@@ -215,6 +215,10 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
                 raise ApiError(code=resp.status_code, message="API call failed (status not 200).")
             
     def _update_ratelimit(self, resp: httpx.Response):
+        # api does not send rate limit info when the server key is invalid
+        if resp.status_code == 403:
+            return
+        
         headers = resp.headers
         
         limit_remaining = headers.get("x-ratelimit-remaining")
