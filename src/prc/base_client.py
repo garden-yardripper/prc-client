@@ -63,8 +63,6 @@ def create_sync_client(server_key: str | None, global_key: str | None, **kwargs)
     if server_key is not None:
         headers["server-key"] = server_key
     
-    print(headers)
-    
     return httpx.Client(
         base_url="https://api.erlc.gg/",
         headers=headers,
