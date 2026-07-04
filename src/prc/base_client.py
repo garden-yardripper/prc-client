@@ -43,9 +43,11 @@ class _Endpoint(StrEnum):
 
 def create_async_client(server_key: str | None, global_key: str | None, **kwargs) -> httpx.AsyncClient:
     logger.debug("Creating new async HTTPX client.")
-    headers = {"server-key": server_key or "..."}
+    headers = {}
     if global_key is not None:
         headers["Authorization"] = global_key
+    if server_key is not None:
+        headers["server-key"] = server_key
     
     return httpx.AsyncClient(
         base_url="https://api.erlc.gg/",
@@ -55,9 +57,13 @@ def create_async_client(server_key: str | None, global_key: str | None, **kwargs
     
 def create_sync_client(server_key: str | None, global_key: str | None, **kwargs) -> httpx.Client:
     logger.debug("Creating new sync HTTPX client.")
-    headers = {"server-key": server_key or "..."}
+    headers = {}
     if global_key is not None:
         headers["Authorization"] = global_key
+    if server_key is not None:
+        headers["server-key"] = server_key
+    
+    print(headers)
     
     return httpx.Client(
         base_url="https://api.erlc.gg/",
