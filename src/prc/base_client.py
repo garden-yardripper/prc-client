@@ -38,8 +38,8 @@ class _Endpoint(StrEnum):
     
     fall_blank_map = "/maps/fall_blank.png"
     fall_postals_map = "/maps/fall_postals.png"
-    winter_blank_map = "/maps/snow_blank.png"
-    winter_postals_map = "/maps/snow_postals.png"
+    snow_blank_map = "/maps/snow_blank.png"
+    snow_postals_map = "/maps/snow_postals.png"
 
 def create_async_client(server_key: str | None, global_key: str | None, **kwargs) -> httpx.AsyncClient:
     logger.debug("Creating new async HTTPX client.")
