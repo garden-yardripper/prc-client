@@ -24,7 +24,7 @@ pip install prc-client
 Optionally install additional dependencies:
 
 ```bash
-pip install prc-client[events,fastapi]
+pip install prc-client[events]
 ```
 
 # Quick Start
