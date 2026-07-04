@@ -6,7 +6,7 @@ This library aims to provide all the functionality you need without overwhelming
 # Key Features
 - 100% coverage of all V1 and V2 API endpoints
 - Full support for the event webhook API
-- Full support for **public applications**
+- Full support for [**public applications**](README.md#public-application-guide)
 - Support for both synchronous and asynchronous applications
 - Automatic rate limit handling
 - Intuitive developer interface allows for rapid prototyping and high development experience
