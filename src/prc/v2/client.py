@@ -79,13 +79,16 @@ class AsyncClient(_GetServer, _SendCommand):
         """Get a `BundledServer` object with all server data available."""
         return await self._get_bundled_server_async()
     
-    async def send_command(self, command: "CommandLike") -> Response:
+    async def send_command(self, command: "CommandLike", *, server_key: str | None = None) -> Response:
         """Send a command to the server.
 
         Parameters
         ----------
         command: `CommandLike`
             The command to send to the server.
+        server_key: `str` | `None` (optional)
+            The server key to send this command to.
+            This is only required for public applications.
         
         Returns
         -------
@@ -94,7 +97,7 @@ class AsyncClient(_GetServer, _SendCommand):
         """
         if self.policy:
             self.policy.preview_command(command, raise_for_status=True)
-        return await self._send_command_async(command)
+        return await self._send_command_async(command, server_key=server_key)
     
     async def get_player_from_user(
         self,
@@ -189,13 +192,16 @@ class Client(_GetServer, _SendCommand):
         """Get a `BundledServer` object with all server data available."""
         return self._get_bundled_server_sync()
     
-    def send_command(self, command: "CommandLike") -> Response:
+    def send_command(self, command: "CommandLike", *, server_key: str | None = None) -> Response:
         """Send a command to the server.
 
         Parameters
         ----------
         command: `CommandLike`
             The command to send to the server.
+        server_key: `str` | `None` (optional)
+            The server key to send this command to.
+            This is only required for public applications.
         
         Returns
         -------
@@ -204,7 +210,7 @@ class Client(_GetServer, _SendCommand):
         """
         if self.policy:
             self.policy.preview_command(command, raise_for_status=True)
-        return self._send_command_sync(command)
+        return self._send_command_sync(command, server_key=server_key)
     
     def get_player_from_user(
         self,
