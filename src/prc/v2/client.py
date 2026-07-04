@@ -51,6 +51,7 @@ class AsyncClient(_GetServer, _SendCommand):
     """Asynchronous client for the ER:LC private server API."""
     async def get_server(
         self, *,
+        server_key: str | None = None,
         players: bool = False,
         staff: bool = False,
         join_logs: bool = False,
@@ -64,6 +65,7 @@ class AsyncClient(_GetServer, _SendCommand):
         """Get a `Server` object with only the specified data.
         Use parameters to control which data is included."""
         return await self._get_server_async(
+            server_key=server_key,
             players=players,
             staff=staff,
             join_logs=join_logs,
@@ -75,9 +77,9 @@ class AsyncClient(_GetServer, _SendCommand):
             vehicles=vehicles
         )
     
-    async def get_bundled_server(self) -> BundledServer:
+    async def get_bundled_server(self, *, server_key: str | None = None) -> BundledServer:
         """Get a `BundledServer` object with all server data available."""
-        return await self._get_bundled_server_async()
+        return await self._get_bundled_server_async(server_key=server_key)
     
     async def send_command(self, command: "CommandLike", *, server_key: str | None = None) -> Response:
         """Send a command to the server.
@@ -164,6 +166,7 @@ class Client(_GetServer, _SendCommand):
     """Synchronous client for the ER:LC private server API."""
     def get_server(
         self, *,
+        server_key: str | None = None,
         players: bool = False,
         staff: bool = False,
         join_logs: bool = False,
@@ -177,6 +180,7 @@ class Client(_GetServer, _SendCommand):
         """Get a lean `Server` object with only the specified data.
         Use parameters to control which data is included in the response."""
         return self._get_server_sync(
+            server_key=server_key,
             players=players,
             staff=staff,
             join_logs=join_logs,
@@ -188,9 +192,9 @@ class Client(_GetServer, _SendCommand):
             vehicles=vehicles
         )
     
-    def get_bundled_server(self) -> BundledServer:
+    def get_bundled_server(self, *, server_key: str | None = None) -> BundledServer:
         """Get a `BundledServer` object with all server data available."""
-        return self._get_bundled_server_sync()
+        return self._get_bundled_server_sync(server_key=server_key)
     
     def send_command(self, command: "CommandLike", *, server_key: str | None = None) -> Response:
         """Send a command to the server.

@@ -22,6 +22,7 @@ ALL_DATA_PARAMS = _format_bool_params({
 class _GetServer(_BaseApiClient):
     async def _get_server_async(
         self, *,
+        server_key: str | None = None,
         players: bool = False,
         staff: bool = False,
         join_logs: bool = False,
@@ -46,22 +47,36 @@ class _GetServer(_BaseApiClient):
         
         logger.info("Fetching server data with params", extra=params)
         
-        response = await self._send_async_request(
-            endpoint=_Endpoint.v2_server,
-            params=params
-        )
+        if server_key:
+            response = await self._send_async_request(
+                endpoint=_Endpoint.v2_server,
+                headers={"server-key": server_key},
+                params=params
+            )
+        else:
+            response = await self._send_async_request(
+                endpoint=_Endpoint.v2_server,
+                params=params
+            )
         
         server = Server.model_validate(response.json())
         if self.registry is not None:
             self.registry._extract_user_data_from_server(server)
         return server
     
-    async def _get_bundled_server_async(self) -> BundledServer:
+    async def _get_bundled_server_async(self, *, server_key: str | None = None) -> BundledServer:
         logger.info("Fetching bundled server data.")
-        response = await self._send_async_request(
-            endpoint=_Endpoint.v2_server,
-            params=ALL_DATA_PARAMS
-        )
+        if server_key:
+            response = await self._send_async_request(
+                endpoint=_Endpoint.v2_server,
+                headers={"server-key": server_key},
+                params=ALL_DATA_PARAMS
+            )
+        else:
+            response = await self._send_async_request(
+                endpoint=_Endpoint.v2_server,
+                params=ALL_DATA_PARAMS
+            )
         
         bundle = BundledServer.model_validate(response.json())
         if self.registry is not None:
@@ -70,6 +85,7 @@ class _GetServer(_BaseApiClient):
     
     def _get_server_sync(
         self, *,
+        server_key: str | None = None,
         players: bool = False,
         staff: bool = False,
         join_logs: bool = False,
@@ -94,22 +110,36 @@ class _GetServer(_BaseApiClient):
         
         logger.info("Fetching server data with params", extra=params)
         
-        response = self._send_sync_request(
-            endpoint=_Endpoint.v2_server,
-            params=params
-        )
+        if server_key:
+            response = self._send_sync_request(
+                endpoint=_Endpoint.v2_server,
+                headers={"server-key": server_key},
+                params=params
+            )
+        else:
+            response = self._send_sync_request(
+                endpoint=_Endpoint.v2_server,
+                params=params
+            )
         
         server = Server.model_validate(response.json())
         if self.registry is not None:
             self.registry._extract_user_data_from_server(server)
         return server
         
-    def _get_bundled_server_sync(self) -> BundledServer:
+    def _get_bundled_server_sync(self, *, server_key: str | None = None) -> BundledServer:
         logger.info("Fetching bundled server data.")
-        response = self._send_sync_request(
-            endpoint=_Endpoint.v2_server,
-            params=ALL_DATA_PARAMS
-        )
+        if server_key:
+            response = self._send_sync_request(
+                endpoint=_Endpoint.v2_server,
+                headers={"server-key": server_key},
+                params=ALL_DATA_PARAMS
+            )
+        else:
+            response = self._send_sync_request(
+                endpoint=_Endpoint.v2_server,
+                params=ALL_DATA_PARAMS
+            )
         
         bundle = BundledServer.model_validate(response.json())
         if self.registry is not None:
