@@ -6,6 +6,7 @@ This library aims to provide all the functionality you need without overwhelming
 # Key Features
 - 100% coverage of all V1 and V2 API endpoints
 - Full support for the event webhook API
+- Full support for **public applications**
 - Support for both synchronous and asynchronous applications
 - Automatic rate limit handling
 - Intuitive developer interface allows for rapid prototyping and high development experience
@@ -192,3 +193,39 @@ async def prc_webhook(request: Request, background_tasks: BackgroundTasks):
 </details>
 
 Check out the [examples](./examples) for more information on specific use cases.
+
+# Public Application Guide
+`prc-client` fully supports PRC's new public application system. With the new ERLC API safety changes, this is essential for medium-sized apps to be able to send commands to users' servers without needing to be manually IP whitelisted.
+
+The authentication flow is described in more detail on PRC's [documentation](https://apidocs.erlc.gg/creating-authorization-links), however the basic steps are as follows:
+
+1. Ask the user for their server key
+2. Generate an auth URL from the server key and application ID
+3. User accepts the request from the link
+4. Use the user's server key along with your application's global key to authenticate command requests
+
+`prc-client` hides the internal details for you, but it is important to understand how it works.
+
+Public applications are created with the regular `Client`/`AsyncClient` clients. Let's create one:
+
+```python
+import prc
+from prc import cmd
+
+# Create an application via https://api.erlc.gg/developers/applications
+# and set your global key and app ID here
+# Note: You cannot supply server_key and global_key/app_id together
+app = prc.v2.Client(
+    global_key="...",
+    app_id=123
+)
+
+# Simulated server key input from a user; replace with an actual mechanism
+server_key = input("What is your server key?")
+link = app.generate_auth_link(server_key)
+print("Please authenticate this app via this link:", link)
+
+# Once the user authenticates, this command will work
+# without needing manual IP whitelisting:
+app.send_command(cmd.m("This works!"), server_key=server_key)
+```
