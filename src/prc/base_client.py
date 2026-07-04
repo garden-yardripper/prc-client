@@ -337,8 +337,27 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         This link grants your public application permission to run commands on the user's server
         once accepted by the user.
         
-        Your application should not store the user's server key anywhere; you will have
-        the required permissions to run commands using only your `global_key` once the user accepts."""
+        Your application should store the user's server key in a database so you can authenticate
+        requests to their server using your global key. Your application will only have access to 
+        run commands once the user clicks the link and accepts the request; you will be blocked otherwise.
+        
+        Parameters
+        ----------
+        server_key: `str`
+            The server key to use for generating the auth link.
+        
+        Raises
+        ------
+        `RuntimeError`
+            The client is not a public application (`global_key` and `app_id` are not provided).
+        `ValueError`
+            An invalid server key was provided.
+        
+        Returns
+        -------
+        `str`
+            The generated link that you should present to the user.
+        """
         
         if not self.global_key or not self.app_id:
             raise RuntimeError("Client is not a public application.")
