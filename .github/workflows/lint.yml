@@ -28,7 +28,7 @@ jobs:
         id: install-deps
         run: |
           python -m pip install --upgrade pip
-          pip install .[events,fastapi,starlette,quart]
+          pip install .[events]
           pip install pytest pytest-asyncio respx ruff
 
       - name: Run Pyright
