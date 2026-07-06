@@ -55,3 +55,10 @@ lint.select = ["E", "F"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.pyright]
+ignore = [
+    "examples/**",
+    "src/prc/events/router.py",
+    "src/prc/events/integrations/**"
+]
