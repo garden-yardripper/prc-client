@@ -206,7 +206,9 @@ The authentication flow is described in more detail on PRC's [documentation](htt
 
 `prc-client` hides the internal details for you, but it is important to understand how it works.
 
-Public applications are created with the regular `Client`/`AsyncClient` clients. Let's create one:
+Public applications are required to supply the `server_key` parameter for every call to `send_command`. This is a requirement by the API in order to authenticate and specify the server to send the command to.
+
+Public applications are created with the regular `Client`/`AsyncClient` V2 clients. Let's create one:
 
 ```python
 import prc
@@ -226,6 +228,6 @@ link = app.generate_auth_link(server_key)
 print("Please authenticate this app via this link:", link)
 
 # Once the user authenticates, this command will work
-# without needing manual IP whitelisting:
+# without needing manual IP whitelisting.
 app.send_command(cmd.m("This works!"), server_key=server_key)
 ```
