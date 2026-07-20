@@ -14,5 +14,6 @@ wheels/
 .pytest_cache/
 .vscode/
 _test_*.py
+_test_*.ipynb
 logs/
 dev/
