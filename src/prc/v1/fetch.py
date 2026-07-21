@@ -23,27 +23,27 @@ class _GetDataAsync(_BaseApiClient):
         logger.info("Fetching players data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_players)
         players = [Player.model_validate(player) for player in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for player in players:
-                self.registry._add_user(player.user)
+                self._registry._add_user(player.user)
         return players
     
     async def get_staff(self) -> Staff:
         logger.info("Fetching staff data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_staff)
         staff = Staff.model_validate(response.json())
-        if self.registry is not None:
+        if self._registry is not None:
             for user in chain(staff.admins, staff.mods):
-                self.registry._add_user(user)
+                self._registry._add_user(user)
         return staff
     
     async def get_join_logs(self) -> list[JoinLog]:
         logger.info("Fetching join logs data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_join_logs)
         logs = [JoinLog.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.user)
+                self._registry._add_user(log.user)
         return logs
     
     async def get_queue(self) -> Queue:
@@ -55,38 +55,38 @@ class _GetDataAsync(_BaseApiClient):
         logger.info("Fetching kill logs data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_kill_logs)
         logs = [KillLog.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.killer)
-                self.registry._add_user(log.killed)
+                self._registry._add_user(log.killer)
+                self._registry._add_user(log.killed)
         return logs
     
     async def get_command_logs(self) -> list[CommandLog]:
         logger.info("Fetching command logs data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_command_logs)
         logs = [CommandLog.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.user)
+                self._registry._add_user(log.user)
         return logs
     
     async def get_mod_calls(self) -> list[ModCall]:
         logger.info("Fetching mod calls data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_mod_calls)
         logs = [ModCall.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.caller)
-                self.registry._add_user(log.moderator)
+                self._registry._add_user(log.caller)
+                self._registry._add_user(log.moderator)
         return logs
     
     async def get_bans(self) -> Bans:
         logger.info("Fetching bans data.")
         response = await self._send_async_request(endpoint=_Endpoint.v1_bans)
         bans = Bans.model_validate(response.json())
-        if self.registry is not None:
+        if self._registry is not None:
             for user in bans.users:
-                self.registry._add_user(user)
+                self._registry._add_user(user)
         return bans
     
     async def get_vehicles(self) -> list[Vehicle]:
@@ -104,27 +104,27 @@ class _GetDataSync(_BaseApiClient):
         logger.info("Fetching players data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_players)
         players = [Player.model_validate(player) for player in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for player in players:
-                self.registry._add_user(player.user)
+                self._registry._add_user(player.user)
         return players
     
     def get_staff(self) -> Staff:
         logger.info("Fetching staff data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_staff)
         staff = Staff.model_validate(response.json())
-        if self.registry is not None:
+        if self._registry is not None:
             for user in chain(staff.admins, staff.mods):
-                self.registry._add_user(user)
+                self._registry._add_user(user)
         return staff
     
     def get_join_logs(self) -> list[JoinLog]:
         logger.info("Fetching join logs data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_join_logs)
         logs = [JoinLog.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.user)
+                self._registry._add_user(log.user)
         return logs
     
     def get_queue(self) -> Queue:
@@ -136,38 +136,38 @@ class _GetDataSync(_BaseApiClient):
         logger.info("Fetching kill logs data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_kill_logs)
         logs = [KillLog.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.killer)
-                self.registry._add_user(log.killed)
+                self._registry._add_user(log.killer)
+                self._registry._add_user(log.killed)
         return logs
     
     def get_command_logs(self) -> list[CommandLog]:
         logger.info("Fetching command logs data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_command_logs)
         logs = [CommandLog.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.user)
+                self._registry._add_user(log.user)
         return logs
     
     def get_mod_calls(self) -> list[ModCall]:
         logger.info("Fetching mod calls data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_mod_calls)
         logs = [ModCall.model_validate(log) for log in response.json()]
-        if self.registry is not None:
+        if self._registry is not None:
             for log in logs:
-                self.registry._add_user(log.caller)
-                self.registry._add_user(log.moderator)
+                self._registry._add_user(log.caller)
+                self._registry._add_user(log.moderator)
         return logs
     
     def get_bans(self) -> Bans:
         logger.info("Fetching bans data.")
         response = self._send_sync_request(endpoint=_Endpoint.v1_bans)
         bans = Bans.model_validate({"Users": response.json()})
-        if self.registry is not None:
+        if self._registry is not None:
             for user in bans.users:
-                self.registry._add_user(user)
+                self._registry._add_user(user)
         return bans
 
     def get_vehicles(self) -> list[Vehicle]:

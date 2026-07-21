@@ -175,7 +175,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         self.is_public: bool = self.server_key is None
         
-        self.registry: UserRegistry | None = UserRegistry() if use_registry else None
+        self._registry: UserRegistry | None = UserRegistry() if use_registry else None
         
         # rate limit tracking attributes, updated on each request based on response headers
         self._post_expiration: int = int(time.time())
@@ -329,8 +329,8 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         Recommended to save API requests. Does nothing if the registry is already enabled.
         """
-        if self.registry is None:
-            self.registry = UserRegistry()
+        if self._registry is None:
+            self._registry = UserRegistry()
             logger.info("User registry enabled.")
         else:
             logger.debug("User registry already enabled; no action taken.")
@@ -340,12 +340,19 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         
         Does nothing if the registry is already disabled.
         """
-        if self.registry is not None:
-            self.registry.clear()
-            self.registry = None
+        if self._registry is not None:
+            self._registry.clear()
+            self._registry = None
             logger.info("User registry disabled and cleared.")
         else:
             logger.debug("User registry already disabled; no action taken.")
+    
+    @property
+    def registry(self) -> UserRegistry:
+        if self._registry is None:
+            logger.error("Attempted to access user registry while disabled.")
+            raise RuntimeError("User registry is not enabled for this client.")
+        return self._registry
     
     def generate_auth_link(self, server_key: str) -> str:
         """Create an authorization link from the specified **full** server key.
