@@ -8,6 +8,10 @@ class UserRegistry:
         self._id_to_name: dict[int, str] = {}
         self._name_to_id: dict[str, int] = {}
     
+    def clear(self):
+        self._id_to_name.clear()
+        self._name_to_id.clear()
+        
     def _add_user(self, user: FullUser) -> None:
         self._id_to_name[user.id] = user.name
         self._name_to_id[user.name] = user.id
@@ -90,3 +94,6 @@ class UserRegistry:
                 return FullUser(name_search, id)
         
         return None
+    
+    def __len__(self) -> int:
+        return len(self._id_to_name)
