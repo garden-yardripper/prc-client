@@ -324,6 +324,29 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     def _post_wait_time(self) -> float:
         return max(self._post_expiration - time.time() + 1, 0)
     
+    def enable_registry(self):
+        """Enable the user registry to store full users and retrieve them when needed.
+        
+        Recommended to save API requests. Does nothing if the registry is already enabled.
+        """
+        if self.registry is None:
+            self.registry = UserRegistry()
+            logger.info("User registry enabled.")
+        else:
+            logger.debug("User registry already enabled; no action taken.")
+            
+    def disable_registry(self):
+        """Disable the user registry and clear all stored users.
+        
+        Does nothing if the registry is already disabled.
+        """
+        if self.registry is not None:
+            self.registry.clear()
+            self.registry = None
+            logger.info("User registry disabled and cleared.")
+        else:
+            logger.debug("User registry already disabled; no action taken.")
+    
     def generate_auth_link(self, server_key: str) -> str:
         """Create an authorization link from the specified **full** server key.
         
