@@ -60,8 +60,8 @@ class _GetServer(_BaseApiClient):
             )
         
         server = Server.model_validate(response.json())
-        if self.registry is not None:
-            self.registry._extract_user_data_from_server(server)
+        if self._registry is not None:
+            self._registry._extract_user_data_from_server(server)
         return server
     
     async def _get_bundled_server_async(self, *, server_key: str | None = None) -> BundledServer:
@@ -79,8 +79,8 @@ class _GetServer(_BaseApiClient):
             )
         
         bundle = BundledServer.model_validate(response.json())
-        if self.registry is not None:
-            self.registry._extract_user_data_from_server(bundle)
+        if self._registry is not None:
+            self._registry._extract_user_data_from_server(bundle)
         return bundle
     
     def _get_server_sync(
@@ -123,8 +123,8 @@ class _GetServer(_BaseApiClient):
             )
         
         server = Server.model_validate(response.json())
-        if self.registry is not None:
-            self.registry._extract_user_data_from_server(server)
+        if self._registry is not None:
+            self._registry._extract_user_data_from_server(server)
         return server
         
     def _get_bundled_server_sync(self, *, server_key: str | None = None) -> BundledServer:
@@ -142,6 +142,6 @@ class _GetServer(_BaseApiClient):
             )
         
         bundle = BundledServer.model_validate(response.json())
-        if self.registry is not None:
-            self.registry._extract_user_data_from_server(bundle)
+        if self._registry is not None:
+            self._registry._extract_user_data_from_server(bundle)
         return bundle
