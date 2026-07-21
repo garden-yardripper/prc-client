@@ -33,7 +33,7 @@ Import the `prc` module and create a client instance.
 ```python
 import prc
 
-client = prc.v2.Client()
+client = prc.v2.Client(server_key="...")
 ```
 <details>
 <summary>Or asynchronously...</summary>
@@ -41,7 +41,7 @@ client = prc.v2.Client()
 ```python
 import prc
 
-client = prc.v2.AsyncClient()
+client = prc.v2.AsyncClient(server_key="...")
 ```
 </details>  
 
@@ -50,7 +50,7 @@ Get a server with configurable parameters, or get a `BundledServer` with all ava
 ```python
 import prc
 
-client = prc.v2.Client()
+client = prc.v2.Client(server_key="...")
 
 # Contains only the specified data
 server = client.get_server(players=True, vehicles=True)
@@ -65,7 +65,7 @@ bundled_server = client.get_bundled_server()
 import prc
 
 async def main():
-    client = prc.v2.AsyncClient()
+    client = prc.v2.AsyncClient(server_key="...")
 
     # Contains only the specified data
     server = await client.get_server(players=True, vehicles=True)
@@ -80,7 +80,7 @@ Send a command to the server using the `send_command` method and `cmd` factory t
 import prc
 from prc import cmd
 
-client = prc.v2.Client()
+client = prc.v2.Client(server_key="...")
 
 # Contains only the specified data
 server = client.get_server(players=True, vehicles=True)
@@ -99,7 +99,7 @@ import prc
 from prc import cmd
 
 async def main():
-    client = prc.v2.AsyncClient()
+    client = prc.v2.AsyncClient(server_key="...")
 
     # Contains only the specified data
     server = await client.get_server(players=True, vehicles=True)
@@ -118,7 +118,7 @@ import prc
 from prc import cmd
 from prc.events import Router, Context
 
-client = prc.v2.Client()
+client = prc.v2.Client(server_key="...")
 # Create a router
 router = Router(client)
 
@@ -149,7 +149,7 @@ import prc
 from prc import cmd
 from prc.events import Router, Context
 
-client = prc.v2.AsyncClient()
+client = prc.v2.AsyncClient(server_key="...")
 # Create a router
 router = Router(client)
 
@@ -181,7 +181,12 @@ async def main():
 See the [FastAPI documentation](https://fastapi.tiangolo.com/) for more information on how to use FastAPI.
 
 ```python
+import prc
+from prc.events import Router
 from fastapi import FastAPI, Request, Response, BackgroundTasks
+
+client = prc.v2.Client(server_key="...")
+router = Router(client)
 
 app = FastAPI()
 
