@@ -82,7 +82,6 @@ class ApiError(PRCError):
 
             # no more specific subclass matched, check if this child matches
             if child._matches_code(code):
-                print(f"Found matching subclass {child.__name__} for code {code}.")
                 return child
 
         # no more specific match was found, return this class
@@ -102,7 +101,6 @@ class ApiError(PRCError):
             raise DeserializationError("Data for ApiError is missing one or more necessary fields.")
 
         logger.debug("Validated ApiError data.")
-        print(f"Dispatching to {error_cls.__name__} for code {clean['code']}.")
         return error_cls(**clean)
     
 class SystemError(ApiError):
