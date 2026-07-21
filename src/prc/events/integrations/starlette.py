@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Literal
-from ..router import Router
 
 if TYPE_CHECKING:
+    from ..router import Router
     from starlette.requests import Request
     from starlette.background import BackgroundTask
 
 class _StarletteIntegration:
-    def __init__(self, router: Router) -> None:
+    def __init__(self, router: "Router") -> None:
         self.router = router
     
     async def handle_starlette_request(
