@@ -13,7 +13,7 @@ def test_get_bundled_server_sync(v2_payload: dict, respx_mock: respx.MockRouter)
         json=v2_payload
     )
     
-    client = prc.v2.Client("server-key")
+    client = prc.v2.Client("server-key", use_registry=False, wait_for_rate_limit=False)
     server = client.get_bundled_server()
     
     assert route.called
@@ -43,7 +43,7 @@ async def test_get_bundled_server_async(v2_payload: dict, respx_mock: respx.Mock
         json=v2_payload
     )
     
-    client = prc.v2.AsyncClient("server-key")
+    client = prc.v2.AsyncClient("server-key", use_registry=False, wait_for_rate_limit=False)
     server = await client.get_bundled_server()
     
     assert route.called
@@ -67,7 +67,7 @@ async def test_get_bundled_server_async(v2_payload: dict, respx_mock: respx.Mock
     assert server.queue.length == 1
 
 def test_raise_for_status():
-    client = prc.v2.Client("server-key")
+    client = prc.v2.Client("server-key", use_registry=False, wait_for_rate_limit=False)
     
     ratelimit_body = {"code": 429, "message": "rate limited", "retry_after": 1}
     ratelimit_resp = httpx.Response(429, content=json.dumps(ratelimit_body).encode("utf-8"))

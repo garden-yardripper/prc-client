@@ -31,7 +31,7 @@ def test_user_registry_on_bundle(v2_payload: dict, respx_mock: respx.MockRouter)
         json=v2_payload
     )
     
-    client = prc.v2.Client("server-key")
+    client = prc.v2.Client("server-key", wait_for_rate_limit=False)
     server = client.get_bundled_server()
     
     assert route.called
@@ -58,7 +58,7 @@ def test_user_registry_on_server(respx_mock: respx.MockRouter):
         json=server_staff()
     )
     
-    client = prc.v2.Client("server-key")
+    client = prc.v2.Client("server-key", wait_for_rate_limit=False)
     server = client.get_server(staff=True)
     
     assert route.called
@@ -80,7 +80,7 @@ def test_user_registry_on_v1(players_payload, respx_mock: respx.MockRouter):
         json=players_payload
     )
     
-    client = prc.v1.Client("server-key")
+    client = prc.v1.Client("server-key", wait_for_rate_limit=False)
     players = client.get_players()
     
     assert route.called
