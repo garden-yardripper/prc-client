@@ -13,7 +13,7 @@ def test_get_server_sync(server_payload, respx_mock: respx.MockRouter):
         json=server_payload
     )
     
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     server = client.get_server()
     
     assert route.called
@@ -33,7 +33,7 @@ async def test_get_server_async(server_payload, respx_mock: respx.MockRouter):
         json=server_payload
     )
     
-    client = AsyncClient("server-key")
+    client = AsyncClient("server-key", use_registry=False, wait_for_rate_limit=False)
     server = await client.get_server()
     
     assert route.called
@@ -53,7 +53,7 @@ def test_get_players_sync(players_payload, respx_mock: respx.MockRouter):
         json=players_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     players_resp = client.get_players()
 
     assert route.called
@@ -72,7 +72,7 @@ def test_get_staff_sync(staff_payload, respx_mock: respx.MockRouter):
         json=staff_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     staff_resp = client.get_staff()
 
     assert route.called
@@ -89,7 +89,7 @@ def test_get_join_logs_sync(join_logs_payload, respx_mock: respx.MockRouter):
         json=join_logs_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     joins = client.get_join_logs()
 
     assert route.called
@@ -108,7 +108,7 @@ def test_get_queue_sync(queue_payload, respx_mock: respx.MockRouter):
         json=queue_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     q = client.get_queue()
 
     assert route.called
@@ -126,7 +126,7 @@ def test_get_kill_logs_sync(kill_logs_payload, respx_mock: respx.MockRouter):
         json=kill_logs_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     kills = client.get_kill_logs()
 
     assert route.called
@@ -143,7 +143,7 @@ def test_get_command_logs_sync(command_logs_payload, respx_mock: respx.MockRoute
         json=command_logs_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     cmds = client.get_command_logs()
 
     assert route.called
@@ -160,7 +160,7 @@ def test_get_mod_calls_sync(mod_calls_payload, respx_mock: respx.MockRouter):
         json=mod_calls_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     calls = client.get_mod_calls()
 
     assert route.called
@@ -178,7 +178,7 @@ def test_get_bans_sync(bans_payload, respx_mock: respx.MockRouter):
         json=bans_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     bans_resp = client.get_bans()
 
     assert route.called
@@ -195,7 +195,7 @@ def test_get_vehicles_sync(vehicles_payload, respx_mock: respx.MockRouter):
         json=vehicles_payload
     )
 
-    client = Client("server-key")
+    client = Client("server-key", use_registry=False, wait_for_rate_limit=False)
     vehicles_resp = client.get_vehicles()
 
     assert route.called
