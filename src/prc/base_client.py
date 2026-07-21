@@ -175,7 +175,7 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
         self.is_async: bool = issubclass(type(self), (V2AsyncClient, V1AsyncClient))
         self.is_public: bool = self.server_key is None
         
-        self._registry: UserRegistry | None = UserRegistry() if use_registry else None
+        self.registry: UserRegistry | None = UserRegistry() if use_registry else None
         
         # rate limit tracking attributes, updated on each request based on response headers
         self._post_expiration: int = int(time.time())
@@ -323,13 +323,6 @@ class _BaseApiClient(_SyncContext, _AsyncContext):
     
     def _post_wait_time(self) -> float:
         return max(self._post_expiration - time.time() + 1, 0)
-    
-    @property
-    def registry(self) -> UserRegistry:
-        if self._registry is None:
-            logger.error("Attempted to access user registry while disabled.")
-            raise RuntimeError("User registry is not enabled for this client.")
-        return self._registry
     
     def generate_auth_link(self, server_key: str) -> str:
         """Create an authorization link from the specified **full** server key.
