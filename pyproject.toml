@@ -1,6 +1,6 @@
 [project]
 name = "prc-client"
-version = "2.0.0"
+version = "2.1.0"
 description = "A flexible, feature-rich API client for the ER:LC private server API."
 readme = "README.md"
 requires-python = ">=3.12"
