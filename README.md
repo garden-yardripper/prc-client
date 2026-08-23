@@ -6,13 +6,13 @@ This library aims to provide all the functionality you need without overwhelming
 # Key Features
 - 100% coverage of all V1 and V2 API endpoints
 - Full support for the event webhook API
-- Full support for [**public applications**](README.md#public-application-guide)
+- Full support for [public applications](README.md#public-application-guide)
 - Support for both synchronous and asynchronous applications
 - Automatic rate limit handling
 - Intuitive developer interface allows for rapid prototyping and high development experience
 - High performance - built on top of [HTTPX](https://github.com/encode/httpx) for HTTP requests and [Pydantic](https://github.com/samuelcolvin/pydantic) for data validation
 - Detailed docstring documentation and examples
-- Comprehensive error handling and logging
+- Easy to debug with comprehensive error handling and logging
 
 # Installation
 Install `prc-client` using pip:
@@ -40,8 +40,12 @@ client = prc.v2.Client(server_key="...")
 
 ```python
 import prc
+import asyncio
 
-client = prc.v2.AsyncClient(server_key="...")
+async def main():
+    client = prc.v2.AsyncClient(server_key="...")
+
+asyncio.run(main())
 ```
 </details>  
 
@@ -63,6 +67,7 @@ bundled_server = client.get_bundled_server()
 
 ```python
 import prc
+import asyncio
 
 async def main():
     client = prc.v2.AsyncClient(server_key="...")
@@ -71,6 +76,8 @@ async def main():
     server = await client.get_server(players=True, vehicles=True)
     # Contains all available data
     bundled_server = await client.get_bundled_server()
+
+asyncio.run(main())
 ```
 </details> 
 
@@ -96,6 +103,7 @@ client.send_command(cmd.pm(server.players, "Welcome to the server!"))
 
 ```python
 import prc
+import asyncio
 from prc import cmd
 
 async def main():
@@ -108,10 +116,14 @@ async def main():
 
     # Send a PM to all players
     await client.send_command(cmd.pm(server.players, "Welcome to the server!"))
+
+asyncio.run(main())
 ```
 </details> 
 
 Let's set up a router with a simple command handler to receive requests from PRC.
+
+Note that routers require an ASGI web framework using libraries such as FastAPI or Starlette in order to receive and process requests from PRC. Refer to the [Web server guide](README.md#web-server-guide) section for help.
 
 ```python
 import prc
@@ -146,6 +158,7 @@ client.send_command(cmd.pm(server.players, "Welcome to the server!"))
 
 ```python
 import prc
+import asyncio
 from prc import cmd
 from prc.events import Router, Context
 
@@ -160,7 +173,7 @@ async def handle_myid_command(ctx: Context):
 
 # This command handler runs when any command is received
 @router.on.any_command()
-def handle_any_command(ctx: Context):
+async def handle_any_command(ctx: Context):
     print(f"User {ctx.user.id} sent command '{ctx.command.command}' with arguments {ctx.command.arguments}")
 
 async def main():
@@ -171,14 +184,18 @@ async def main():
 
     # Send a PM to all players
     await client.send_command(cmd.pm(server.players, "Welcome to the server!"))
+
+asyncio.run(main())
 ```
 
 </details>
 
-<details>
-<summary>FastAPI application code</summary>
+# Web Server Guide
+In order to properly integrate with PRC's event webhook and receive requests from PRC, you will need to run a web server with an ASGI framework of your choosing. `prc-client` comes with built-in integrations for FastAPI, Starlette, and Quart, but you can use any framework with the lower-level `prepare_request` method.
 
-See the [FastAPI documentation](https://fastapi.tiangolo.com/) for more information on how to use FastAPI.
+Using the `Router` class methods allows the library to automatically validate incoming requests for you and ensure that the request comes from PRC and was not tampered with.
+
+`prc-client` makes the required framework code extremely minimal. Take a look:
 
 ```python
 import prc
@@ -188,6 +205,10 @@ from fastapi import FastAPI, Request, Response, BackgroundTasks
 client = prc.v2.Client(server_key="...")
 router = Router(client)
 
+@router.on.command("myid")
+async def handle_myid_command(ctx: Context):
+    await ctx.areply(f"Your ID is: {ctx.user.id}")
+
 app = FastAPI()
 
 @app.post("/your/endpoint")
@@ -195,9 +216,16 @@ async def prc_webhook(request: Request, background_tasks: BackgroundTasks):
     status = await router.handle_fastapi_request(request, background_tasks)
     return Response(status_code=status)
 ```
-</details>
 
-Check out the [examples](./examples) for more information on specific use cases.
+Code breakdown:
+- Creates a client and an event router
+- Registers the command `;myid`
+- Creates a FastAPI application and creates a POST endpoint
+- Uses the built in `handle_fastapi_request` method to validate the request and dispatches to registered functions. 
+  - The method requires the `Request` and `BackgroundTasks` objects.
+  - It will add the dispatch job as a background task and immediately return the HTTP status code that should be returned to the server. This allows long-running or rate-limit-bound functions to run in the background while immediately responding to the server so requests do not time out.
+
+See the [FastAPI documentation](https://fastapi.tiangolo.com/) for more information on how to use FastAPI, or check out the [examples](./examples) for more information on specific use cases.
 
 # Public Application Guide
 `prc-client` fully supports PRC's new public application system. With the new ERLC API safety changes, this is essential for medium-sized apps to be able to send commands to users' servers without needing to be manually IP whitelisted.
