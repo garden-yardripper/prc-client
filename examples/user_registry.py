@@ -7,7 +7,8 @@ router = Router(client, sync_handlers_to_thread=True)
 
 # When retrieving servers, any full users in the data are automatically stored in a user registry
 # which allows you to access a full user in the future if you only have a username or ID.
-# This is useful when running certain commands (like :pm) that only require a username.
+# This can save API requests, speed up calls,
+# and allow you to run certain commands (like :pm) that only accept a username.
 server = client.get_bundled_server()
 
 @router.on.command("hello")
@@ -17,7 +18,7 @@ def hello_command(ctx: Context):
     # and fall back to calling the API to get the user's info.
     ctx.reply("Hello, world!")
 
-# You can also check the registry manually using the client.cache attribute:
+# You can also check the registry manually using the client.registry attribute:
 user = client.registry.resolve("username")
 if user:
     client.send_command(cmd.pm(user, "I found you!"))
