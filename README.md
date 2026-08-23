@@ -217,6 +217,11 @@ async def prc_webhook(request: Request, background_tasks: BackgroundTasks):
     return Response(status_code=status)
 ```
 
+Run the program as `main.py`:
+```
+uvicorn main:app
+```
+
 Code breakdown:
 - Creates a client and an event router
 - Registers the command `;myid`
