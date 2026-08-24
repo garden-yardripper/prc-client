@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     
 logger = logging.getLogger(__name__)
 
-@dataclass
+@dataclass(frozen=True)
 class CommandPreview:
     """Represents the result of a command preview.
     

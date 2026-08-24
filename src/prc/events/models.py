@@ -9,7 +9,7 @@ from ..v2.models import EmergencyCall
 from ..v2.client import Client, AsyncClient
 from ..command import cmd
 
-@dataclass
+@dataclass(frozen=True)
 class CustomCommand:
     """Represents a custom `;` in-game command.
     
