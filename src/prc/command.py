@@ -26,7 +26,7 @@ class Command:
     instead of instantiating this class directly:
     
     ```python
-    from prc.v2 import cmd
+    from prc import cmd
     
     cmd.pm("Alice", "Hello World!") # Command(text=":pm Alice Hello World!")
     ```
