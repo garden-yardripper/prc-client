@@ -22,10 +22,10 @@ from .decorators import _On
 from .models import EventBatch
 
 if TYPE_CHECKING:
-    from fastapi import Request as FastRequest, BackgroundTasks as FastBackgroundTasks
-    from quart import Quart
-    from starlette.requests import Request as StarletteRequest
-    from starlette.background import BackgroundTask as StarletteBackgroundTask
+    from fastapi import Request as FastRequest, BackgroundTasks as FastBackgroundTasks  # type: ignore
+    from quart import Quart                                                             # type: ignore
+    from starlette.requests import Request as StarletteRequest                          # type: ignore
+    from starlette.background import BackgroundTask as StarletteBackgroundTask          # type: ignore
 
 ANY_COMMAND = object()
 ANY_EVENT = object()
