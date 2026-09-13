@@ -1,14 +1,16 @@
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..v2.client import AsyncClient, Client
 from .models import Context
-from .router import Router
+
+if TYPE_CHECKING:
+    from .router import Router
 
 type _EventHandler[T: (Client, AsyncClient)] = Callable[[Context[T]], Any]
 type _EventDecorator[T: (Client, AsyncClient)] = Callable[[_EventHandler[T]], _EventHandler[T]]
 
 class _On[T: (Client, AsyncClient)]:
-    def __init__(self, router: Router) -> None:
+    def __init__(self, router: "Router") -> None:
         self.router = router
         
     def command(self, command: str, *commands: str) -> _EventDecorator[T]:
